@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import React, { useContext } from "react";
 import { ToastContainer } from "react-toastify";
 import { AccountContext } from "@/context/AccountContext";
+import { useRouter } from "next/navigation";
 
 const HeaderStyleguide = dynamic(
 	() => import("taltech-styleguide").then((mod) => mod.Header),
@@ -13,11 +14,14 @@ const HeaderStyleguide = dynamic(
 export default function Header() {
 	const { accountInfo, setAccountInfo } = useContext(AccountContext);
 
+	const router = useRouter();
+
 	const handleLogout = (e: React.MouseEvent) => {
 		e.preventDefault();
 		// localStorage.removeItem('_jwt');
 		// localStorage.removeItem('_refreshToken');
 		setAccountInfo!({});
+		router.push("/login");
 	};
 
 	return (
@@ -43,7 +47,7 @@ export default function Header() {
 					target: "_blank",
 				}}
 				profile={
-					accountInfo
+					accountInfo?.jwt
 						? {
 								links: [
 									{

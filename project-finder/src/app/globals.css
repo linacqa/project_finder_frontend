@@ -1,0 +1,47 @@
+@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined");
+
+.centered-button {
+	display: flex;
+	justify-content: center;
+}
+
+.login-container {
+	display: grid;
+	grid-template-columns: minmax(250px, 1fr) 20px minmax(250px, 1fr);
+	grid-template-rows: 40px auto;
+	grid-template-areas:
+		"login center-text register"
+		"login divider register";
+}
+
+.login-vertical-divider {
+	transform: translateX(20px);
+	background-color: #ddd;
+	height: 100%;
+	width: 2px;
+	grid-area: divider;
+}
+
+.login-field {
+	width: 50%;
+	padding: 10px 15px;
+	border-radius: 8px;
+	border: 1px solid #ccc;
+	outline: none;
+	transition: border 0.3s ease;
+}
+
+.field-label {
+	display: block;
+	margin-bottom: 8px;
+	color: #333;
+}
+
+.field-validation-valid {
+	display: block;
+	margin-top: 4px;
+}
+
+.login-grid-element {
+	grid-area: center-text;
+}

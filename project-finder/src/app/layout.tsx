@@ -1,29 +1,33 @@
-'use client'
-import 'taltech-styleguide/index.css';
+"use client";
+import "taltech-styleguide/index.css";
 import "./globals.css";
 
-import Header from '@/components/Header';
-import dynamic from 'next/dynamic';
+import Header from "@/components/navigation/Header";
+import dynamic from "next/dynamic";
 
 const AppState = dynamic(() => import("@/components/AppState"), { ssr: false });
 
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-    return (
-        <html lang="en">
-            <head>
-                <meta charSet="UTF-8" />
-                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-                <title>Lõputöö teemad | IT-College</title>
-            </head>
-            <body>
-            <AppState>
-                <Header />
-                <main className="container">
-                    {children}
-                </main>
-            </AppState>
-            </body>
-        </html>
-    );
+export default function RootLayout({
+	children,
+}: {
+	children: React.ReactNode;
+}) {
+	return (
+		<html lang="en">
+			<head>
+				<meta charSet="UTF-8" />
+				<meta
+					name="viewport"
+					content="width=device-width, initial-scale=1.0"
+				/>
+				<title>Lõputöö teemad | IT-College</title>
+			</head>
+			<body>
+				<AppState>
+					<Header />
+					<main className="container">{children}</main>
+				</AppState>
+			</body>
+		</html>
+	);
 }

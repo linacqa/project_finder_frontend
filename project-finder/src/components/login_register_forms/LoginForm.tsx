@@ -1,6 +1,6 @@
 "use client";
 
-import { AccountContext } from "@/context/AccountContext";
+import { AccountContext, IAccountInfo } from "@/context/AccountContext";
 import { AccountService } from "@/services/AccountService";
 import { useRouter } from "next/navigation";
 import { useContext, useState } from "react";
@@ -48,9 +48,19 @@ export default function LoginForm() {
 
 			setErrorMessage("");
 
-			setAccountInfo!({
+			var accountInfo: IAccountInfo = {
 				jwt: result.data!.jwt,
 				refreshToken: result.data!.refreshToken,
+			};
+			setAccountInfo!(accountInfo);
+
+			var userInfo = await accountService.getCurrentUserInfoAsync();
+
+			setAccountInfo!({
+				...accountInfo,
+				firstName: userInfo.data!.firstName,
+				lastName: userInfo.data!.lastName,
+				role: userInfo.data!.role,
 			});
 			router.push("/");
 		} catch (error) {
@@ -61,7 +71,7 @@ export default function LoginForm() {
 	return (
 		<>
 			<div style={{ textAlign: "center", gridArea: "login" }}>
-				<h2>Login</h2>
+				<h2>Logi sisse</h2>
 
 				{errorMessage}
 

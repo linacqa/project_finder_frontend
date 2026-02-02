@@ -7,6 +7,7 @@ export interface IAccountInfo {
 	refreshToken?: string;
 	firstName?: string;
 	lastName?: string;
+	role?: "admin" | "user" | "student" | "teacher";
 }
 
 export interface IAccountState {

@@ -6,7 +6,7 @@ import { useContext } from "react";
 export abstract class BaseService {
 	protected axiosInstance: AxiosInstance;
 
-	private setAccountInfo = useContext(AccountContext).setAccountInfo;
+	// private setAccountInfo = useContext(AccountContext).setAccountInfo;
 
 	constructor() {
 		this.axiosInstance = axios.create({
@@ -66,10 +66,10 @@ export abstract class BaseService {
 							);
 							originalRequest.headers.Authorization = `Bearer ${response.data.jwt}`;
 
-							this.setAccountInfo!({
-								jwt: response.data.jwt,
-								refreshToken: response.data.refreshToken,
-							});
+							// this.setAccountInfo!({
+							// 	jwt: response.data.jwt,
+							// 	refreshToken: response.data.refreshToken,
+							// });
 
 							return this.axiosInstance(originalRequest);
 						}

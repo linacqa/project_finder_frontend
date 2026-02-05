@@ -16,8 +16,16 @@ export default function RegisterForm() {
 
 	const [errorMessage, setErrorMessage] = useState("");
 
+	const programOptions = [
+		"IT süsteemide arendus (IADB)",
+		"IT süsteemide administreerimine (IAAB)",
+		"Cyber Security Engineering (IVSB)",
+		"Infosüsteemide analüüs ja kavandamine (IAAM)"
+	]
+
 	type Inputs = {
 		email: string;
+		phoneNumber?: string;
 		firstName: string;
 		lastName: string;
 		password: string;
@@ -25,6 +33,7 @@ export default function RegisterForm() {
 		role: "teacher" | "student" | "user";
 		uniId?: string;
 		matriculationNumber?: string;
+		program?: string;
 	};
 
 	const {
@@ -63,6 +72,8 @@ export default function RegisterForm() {
 				data.role,
 				data.uniId,
 				data.matriculationNumber,
+				data.program,
+				data.phoneNumber,
 			);
 			if (result.errors) {
 				setErrorMessage(result.statusCode + " - " + result.errors[0]);
@@ -161,6 +172,28 @@ export default function RegisterForm() {
 						<span
 							className="text-danger field-validation-valid"
 							data-valmsg-for="Input.Email"
+							data-valmsg-replace="true"
+						>
+							Required!
+						</span>
+					)}
+				</div>
+				<div>
+					<label className="field-label" htmlFor="Input_PhoneNumber">
+						Phone Number
+					</label>
+					<input
+						className="login-field"
+						aria-required="true"
+						placeholder="+37258123456"
+						type="tel"
+						id="Input_PhoneNumber"
+						{...register("phoneNumber", { required: false })}
+					/>
+					{errors.phoneNumber && (
+						<span
+							className="text-danger field-validation-valid"
+							data-valmsg-for="Input.PhoneNumber"
 							data-valmsg-replace="true"
 						>
 							Required!
@@ -269,6 +302,7 @@ export default function RegisterForm() {
                 ) : null}
 
                 {roleValue === "student" && (
+					<>
                     <div>
                         <label htmlFor="matriklinumber" className="field-label">Matriklinumber</label>
                         <input
@@ -289,7 +323,30 @@ export default function RegisterForm() {
 						</span>
 )}
                     </div>
-					// TODO: õppekava valik
+					<div>
+						<label htmlFor="oppekava" className="field-label">Õppekava</label>
+						<select
+							className="login-field"
+							id="Input_Program"
+							{...register("program", { required: true })}
+						>
+							<option value="">Vali õppekava</option>
+							{programOptions.map((option) => (
+								<option key={option} value={option}>
+									{option}
+								</option>
+							))}
+						</select>
+						{errors.program && (
+						<span
+							className="text-danger field-validation-valid"
+							data-valmsg-for="Input.Program"
+							data-valmsg-replace="true"
+						>
+							Required!
+						</span>)}
+					</div>
+					</>
                 )}
 
 				<ButtonGroup

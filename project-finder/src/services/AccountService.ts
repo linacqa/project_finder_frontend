@@ -57,6 +57,8 @@ export class AccountService extends BaseService {
 		role: string,
 		uniId?: string,
 		matriculationNumber?: string,
+		program?: string,
+		phoneNumber?: string,
 	): Promise<IResultObject<ILoginDto>> {
 		const url = "account/register";
 		try {
@@ -68,6 +70,8 @@ export class AccountService extends BaseService {
 				role,
 				uniId,
 				matriculationNumber,
+				program,
+				phoneNumber,
 			};
 
 			const response = await this.axiosInstance.post<ILoginDto>(

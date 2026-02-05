@@ -18,8 +18,8 @@ export default function Header() {
 
 	const handleLogout = (e: React.MouseEvent) => {
 		e.preventDefault();
-		// localStorage.removeItem('_jwt');
-		// localStorage.removeItem('_refreshToken');
+		localStorage.removeItem('_jwt');
+		localStorage.removeItem('_refreshToken');
 		setAccountInfo!({});
 		router.push("/login");
 	};
@@ -32,11 +32,15 @@ export default function Header() {
 						active: true,
 						children: "Lõputööde süsteem",
 						items: [
-							{ children: "All Final Theses", href: "/" },
-							{
-								children: "Declare New Final Thesis Idea",
-								href: "/declare-thesis",
-							},
+							{ children: "All Projects", href: "/" },
+							...(accountInfo?.jwt
+								? [
+										{
+											children: "Submit New Project Idea",
+											href: "/submitIdea",
+										},
+									]
+								: []),
 						],
 						href: "/",
 					},

@@ -14,10 +14,29 @@ import {
 } from "taltech-styleguide";
 import { FormGroup, FormLabel } from "react-bootstrap";
 import { TagService } from "@/services/TagService";
+import { SupervisorService } from "@/services/SupervisorService";
 
 export default function SubmitIdea() {
-	const [tagOptions, setTagOptions] = useState<{ label: string, id: string }[]>([]);
+	const [tagOptions, setTagOptions] = useState<{ label: string }[]>([]);
 	const [loadingTags, setLoadingTags] = useState(false);
+	const [supervisorOptions, setSupervisorOptions] = useState<{ label: string }[]>([]);
+	const [loadingSupervisors, setLoadingSupervisors] = useState(false);
+
+	const [formData, setFormData] = useState({
+		titleInEstonian: "",
+		titleInEnglish: "",
+		type: "finalThesis",
+		tags: [] as string[],
+		description: "",
+		objective: "",
+		problem: "",
+		background: "",
+		teamSizeMin: 1,
+		teamSizeMax: 1,
+		comment: "",
+		supervisors: [] as string[],
+		wantsToSuperviseOrWrite: "no"
+	});
 
 	useEffect(() => {
 		let mounted = true;
@@ -28,12 +47,27 @@ export default function SubmitIdea() {
 			.then((res) => {
 				if (!mounted) return;
 				if (res && res.data) {
-					setTagOptions(res.data.map((t) => ({ label: t.name, id: t.id })));
+					setTagOptions(res.data.map((t) => ({ label: t.name})));
 				}
 			})
 			.catch((err) => console.error(err))
 			.finally(() => {
 				if (mounted) setLoadingTags(false);
+			});
+
+		const supervisorService = new SupervisorService();
+		setLoadingSupervisors(true);
+		supervisorService
+			.getAllAsync()
+			.then((res) => {
+				if (!mounted) return;
+				if (res && res.data) {
+					setSupervisorOptions(res.data.map((s) => ({ label: s.firstName + " " + s.lastName + " (" + s.email + ")"})));
+				}
+			})
+			.catch((err) => console.error(err))
+			.finally(() => {
+				if (mounted) setLoadingSupervisors(false);
 			});
 
 		return () => {
@@ -48,14 +82,36 @@ export default function SubmitIdea() {
 					<Heading as="h3" visual="h5" className="mb-4 font-bold">
 						Submit New Project Idea
 					</Heading>
-					<form onSubmit={() => {}}>
-						<FormGroup controlId="topic">
-							<FormLabel>Pealkiri</FormLabel>
+					<form onSubmit={(e) => {
+						e.preventDefault();
+						console.log(formData);
+					}}>
+						<FormGroup controlId="titleInEstonian">
+							<FormLabel>Pealkiri eesti keeles</FormLabel>
 							<Input
-								name="topic"
-								placeholder="Sisesta pealkiri"
-								// value={formData.topic}
-								// onChange={handleChange}
+								name="titleInEstonian"
+								placeholder="Sisesta eestikeelne pealkiri"
+								value={formData.titleInEstonian}
+								onChange={(e) => setFormData(prev => {
+									return {
+										...prev,
+										titleInEstonian: e.target.value
+									}
+								})}
+							/>
+						</FormGroup>
+						<FormGroup controlId="titleInEnglish">
+							<FormLabel>Pealkiri inglise keeles</FormLabel>
+							<Input
+								name="titleInEnglish"
+								placeholder="Sisesta ingliskeelne pealkiri"
+								value={formData.titleInEnglish}
+								onChange={(e) => setFormData(prev => {
+									return {
+										...prev,
+										titleInEnglish: e.target.value
+									}
+								})}
 							/>
 						</FormGroup>
 
@@ -64,21 +120,45 @@ export default function SubmitIdea() {
 							<div className="d-flex gap-3">
 								<CustomInput
 									id="project-type-final-thesis"
+									name="type"
 									label="Lõputöö"
 									type="radio"
 									inline
+									checked={formData.type == "finalThesis"}
+									onChange={(e) => setFormData(prev => {
+										return {
+											...prev,
+											type: "finalThesis"
+										}
+									})}
 								/>
 								<CustomInput
 									id="project-type-internship"
+									name="type"
 									label="Praktika"
 									type="radio"
 									inline
+									// checked={formData.type == "internship"}
+									onChange={(e) => setFormData(prev => {
+										return {
+											...prev,
+											type: "internship"
+										}
+									})}
 								/>
 								<CustomInput
 									id="project-type-final-thesis-internship"
+									name="type"
 									label="Lõputöö + Praktika"
 									type="radio"
 									inline
+									// checked={formData.type == "finalThesisInternship"}
+									onChange={(e) => setFormData(prev => {
+										return {
+											...prev,
+											type: "finalThesisInternship"
+										}
+									})}
 								/>
 							</div>
 						</FormGroup>
@@ -89,15 +169,20 @@ export default function SubmitIdea() {
 								clearButton
 								id="tags"
 								multiple
-								// allowNew
+								allowNew
 								newSelectionPrefix="Uus märksõna: "
-								options={tagOptions.map((tag) => ({label: tag.label}))}
+								options={tagOptions}
 								placeholder="Vali"
 								positionFixed
-								// selected={formData.tags.map((tag) => ({
-								// 	label: tag,
-								// }))}
-								// onChange={handleTagsChange}
+								selected={formData.tags.map((tag) => ({
+									label: tag,
+								}))}
+								onChange={(selected) => setFormData(prev => {
+									return {
+										...prev,
+										tags: selected.map(option => typeof option === 'string' ? option : option.label)
+									}
+								})}
 							/>
 						</FormGroup>
 
@@ -107,8 +192,13 @@ export default function SubmitIdea() {
 								as="textarea"
 								name="description"
 								placeholder="Sisesta kirjeldus"
-								// value={formData.description}
-								// onChange={handleChange}
+								value={formData.description}
+								onChange={(e) => setFormData(prev => {
+									return {
+										...prev,
+										description: e.target.value
+									}
+								})}
 							/>
 						</FormGroup>
 
@@ -118,8 +208,13 @@ export default function SubmitIdea() {
 								as="textarea"
 								name="objective"
 								placeholder="Sisesta eesmärk"
-								// value={formData.objective}
-								// onChange={handleChange}
+								value={formData.objective}
+								onChange={(e) => setFormData(prev => {
+									return {
+										...prev,
+										objective: e.target.value
+									}
+								})}
 							/>
 						</FormGroup>
 
@@ -129,8 +224,13 @@ export default function SubmitIdea() {
 								as="textarea"
 								name="problem"
 								placeholder="Sisesta probleem"
-								// value={formData.problem}
-								// onChange={handleChange}
+								value={formData.problem}
+								onChange={(e) => setFormData(prev => {
+									return {
+										...prev,
+										problem: e.target.value
+									}
+								})}
 							/>
 						</FormGroup>
 
@@ -140,21 +240,31 @@ export default function SubmitIdea() {
 								as="textarea"
 								name="background"
 								placeholder="Sisesta taust"
-								// value={formData.background}
-								// onChange={handleChange}
+								value={formData.background}
+								onChange={(e) => setFormData(prev => {
+									return {
+										...prev,
+										background: e.target.value
+									}
+								})}
 							/>
 						</FormGroup>
 
-						<FormGroup controlId="teamSize">
+						<FormGroup controlId="teamSizeMin">
 							<FormLabel>Meeskonna minimaalne suurus</FormLabel>
 							<Input
-								name="teamSize"
+								name="teamSizeMin"
 								type="number"
 								placeholder="Sisesta meeskonna minimaalne suurus"
 								min={1}
 								max={10}
-								// value={formData.teamSize}
-								// onChange={handleChange}
+								value={formData.teamSizeMin}
+								onChange={(e) => setFormData(prev => {
+									return {
+										...prev,
+										teamSizeMin: parseInt(e.target.value, 10)
+									}
+								})}
 							/>
 						</FormGroup>
 						<FormGroup controlId="teamSizeMax">
@@ -165,8 +275,13 @@ export default function SubmitIdea() {
 								placeholder="Sisesta meeskonna maksimaalne suurus"
 								min={1}
 								max={10}
-								// value={formData.teamSize}
-								// onChange={handleChange}
+								value={formData.teamSizeMax}
+								onChange={(e) => setFormData(prev => {
+									return {
+										...prev,
+										teamSizeMax: parseInt(e.target.value, 10)
+									}
+								})}
 							/>
 						</FormGroup>
 
@@ -176,21 +291,62 @@ export default function SubmitIdea() {
 								as="textarea"
 								name="comment"
 								placeholder="Sisesta kommentaar"
-								// value={formData.comment}
-								// onChange={handleChange}
+								value={formData.comment}
+								onChange={(e) => setFormData(prev => {
+									return {
+										...prev,
+										comment: e.target.value
+									}
+								})}
 							/>
 						</FormGroup>
 						<FormGroup>
+							<div className="d-flex gap-3">
 							<CustomInput
 								id=":r19:"
 								inline
-								name="isWantsToSuperviseOrWrite"
+								name="wantsToSuperviseOrWrite"
 								label="Soovin juhendada seda projekti"
-								type="checkbox"
+								type="radio"
+								onChange={(e) => setFormData(prev => {
+										return {
+											...prev,
+											wantsToSuperviseOrWrite: "supervise"
+										}
+									})}
 							/>
+							<CustomInput
+								id=":r19:"
+								inline
+								name="wantsToSuperviseOrWrite"
+								label="Soovin ise tegeleda selle projektiga"
+								type="radio"
+								onChange={(e) => setFormData(prev => {
+										return {
+											...prev,
+											wantsToSuperviseOrWrite: "write"
+										}
+									})}
+							/>
+							<CustomInput
+								id=":r19:"
+								inline
+								name="wantsToSuperviseOrWrite"
+								label="Ei soovi juhendada ega ise tegeleda selle projektiga"
+								type="radio"
+								checked={formData.wantsToSuperviseOrWrite == "no"}
+								onChange={(e) => setFormData(prev => {
+										return {
+											...prev,
+											wantsToSuperviseOrWrite: "no"
+										}
+									})}
+							/>
+							</div>
 						</FormGroup>
+
 						<FormGroup controlId="supervisors">
-							<FormLabel>Projekti juhendaja/d</FormLabel>
+							<FormLabel>Soovituslik(-ud) projekti juhendaja(-d)</FormLabel>
 							<div
 								style={{
 									fontSize: "12px",
@@ -206,18 +362,18 @@ export default function SubmitIdea() {
 								multiple
 								allowNew
 								newSelectionPrefix="Uus juhendaja: "
-								// options={supervisorsOptions}
-								options={[]}
+								options={supervisorOptions}
 								placeholder="Vali juhendaja"
 								positionFixed
-								// selected={formData.supervisors.map(
-								// 	(supervisor) => ({ label: supervisor }),
-								// )}
-								// onChange={(selected) => {
-								// 	if (selected.length <= 2) {
-								// 		handleSupervisorsChange(selected);
-								// 	}
-								// }}
+								selected={formData.supervisors.map((supervisor) => ({
+									label: supervisor,
+								}))}
+								onChange={(selected) => setFormData(prev => {
+									return {
+										...prev,
+										supervisors: selected.map(option => typeof option === 'string' ? option : option.label)
+									}
+								})}
 								// isInvalid={
 								// 	formData.isWantsToSuperviseOrWrite &&
 								// 	(formData.userType === "Õppejõud" ||
@@ -240,8 +396,8 @@ export default function SubmitIdea() {
 									</div>
 								)} */}
 						</FormGroup>
+						<TTNewButton type="submit">Esita</TTNewButton>
 					</form>
-					<TTNewButton type="submit">Esita</TTNewButton>
 				</TTNewCardContent>
 			</TTNewCard>
 		</TTNewContainer>

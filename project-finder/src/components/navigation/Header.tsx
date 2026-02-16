@@ -30,7 +30,7 @@ export default function Header() {
 				links={[
 					{
 						active: true,
-						children: "Lõputööde süsteem",
+						children: "Projektide süsteem",
 						items: [
 							{ children: "All Projects", href: "/" },
 							...(accountInfo?.jwt

@@ -4,8 +4,8 @@ export interface IProjectAdd {
 	authorId: string;
 	description: string;
 	client: string | null;
-	supervisorId: string | null;
-	supervisor: string | null;
+	primarySupervisorId: string | null;
+	primarySupervisor: string | null;
 	externalSupervisorId: string | null;
 	externalSupervisor: string | null;
 	minStudents: number;

@@ -14,7 +14,7 @@ import {
 } from "taltech-styleguide";
 import { FormGroup, FormLabel } from "react-bootstrap";
 import { TagService } from "@/services/TagService";
-import { SupervisorService } from "@/services/SupervisorService";
+import { UserService } from "@/services/UserService";
 
 export default function SubmitIdea() {
 	const [tagOptions, setTagOptions] = useState<{ label: string }[]>([]);
@@ -55,10 +55,10 @@ export default function SubmitIdea() {
 				if (mounted) setLoadingTags(false);
 			});
 
-		const supervisorService = new SupervisorService();
+		const userService = new UserService();
 		setLoadingSupervisors(true);
-		supervisorService
-			.getAllAsync()
+		userService
+			.getAllSupervisorsAsync()
 			.then((res) => {
 				if (!mounted) return;
 				if (res && res.data) {

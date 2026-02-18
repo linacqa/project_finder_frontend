@@ -18,8 +18,11 @@ export default function Header() {
 
 	const handleLogout = (e: React.MouseEvent) => {
 		e.preventDefault();
-		localStorage.removeItem('_jwt');
-		localStorage.removeItem('_refreshToken');
+		// localStorage.removeItem("_jwt");
+		// localStorage.removeItem("_refreshToken");
+		// localStorage.removeItem("_firstName");
+		// localStorage.removeItem("_lastName");
+		// localStorage.removeItem("_role");
 		setAccountInfo!({});
 		router.push("/login");
 	};
@@ -32,12 +35,24 @@ export default function Header() {
 						active: true,
 						children: "Projektide süsteem",
 						items: [
-							{ children: "All Projects", href: "/" },
+							{ children: "Home", href: "/" },
 							...(accountInfo?.jwt
 								? [
 										{
 											children: "Submit New Project Idea",
 											href: "/submitIdea",
+										},
+									]
+								: []),
+							...(accountInfo?.jwt && accountInfo.role === "admin"
+								? [
+										{
+											children: "All Projects",
+											href: "/admin/allProjects",
+										},
+										{
+											children: "Add New Project",
+											href: "/admin/addProject",
 										},
 									]
 								: []),

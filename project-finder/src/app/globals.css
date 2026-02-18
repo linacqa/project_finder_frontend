@@ -68,3 +68,9 @@
 .tag-container:hover .tag-remove {
     opacity: 1; /* Show only on hover */
 }
+
+.thesis-list-container {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(240px, 1fr));
+    gap: 16px;
+}

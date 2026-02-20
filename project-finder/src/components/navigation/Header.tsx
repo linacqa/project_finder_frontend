@@ -54,6 +54,14 @@ export default function Header() {
 											children: "Add New Project",
 											href: "/admin/addProject",
 										},
+										{
+											children: "Tags",
+											href: "/admin/tags",
+										},
+										{
+											children: "Steps",
+											href: "/admin/steps",
+										},
 									]
 								: []),
 						],

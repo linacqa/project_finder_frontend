@@ -1,0 +1,43 @@
+import { ButtonGroup, Heading, Input, TTNewButton, TTNewCard, TTNewCardContent } from "taltech-styleguide";
+import ConfirmationModal from "../modal/ConfirmationModal";
+import { useState } from "react";
+
+export default function TagCard({ id, name, onDelete, onUpdate }: { id: string; name: string; onDelete: (id: string) => void; onUpdate: (id: string, newName: string) => void }) {
+	const [showDeleteModal, setShowDeleteModal] = useState(false);
+	const [newName, setNewName] = useState(name);
+
+	const handleDeleteTag = (tagId: string) => {
+		setShowDeleteModal(false);
+		onDelete(tagId);
+	}
+
+	return (
+		<TTNewCard className="mb-4 w-auto" key={id}>
+			<TTNewCardContent>
+				<Heading as="h3" visual="h4" className="mb-3">
+					<Input value={newName} onChange={(e) => setNewName(e.target.value)} />
+				</Heading>
+				<ButtonGroup>
+					<TTNewButton variant="primary" size="sm" onClick={() => onUpdate(id, newName)}>
+						Save
+					</TTNewButton>
+					<TTNewButton
+						variant="danger"
+						size="sm"
+						onClick={() => setShowDeleteModal(true)}
+					>
+						Delete
+					</TTNewButton>
+				</ButtonGroup>
+				<ConfirmationModal
+					show={showDeleteModal}
+					hideAction={() => setShowDeleteModal(false)}
+					title="Kas olete kindel?"
+					text="Kas soovite selle sildi jäädavalt kustutada? Seda toimingut ei saa tagasi võtta."
+					confirmText="Jah, kustuta"
+					confirmAction={() => handleDeleteTag(id)}
+				/>
+			</TTNewCardContent>
+		</TTNewCard>
+	);
+}

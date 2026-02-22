@@ -1,5 +1,6 @@
 import { IDomainId } from "../IDomainId";
 import { IProjectStatus } from "./IProjectStatus";
+import { IProjectType } from "./IProjectType";
 import { ITag } from "./ITag";
 import { IUserProject } from "./IUserProject";
 
@@ -17,5 +18,7 @@ export interface IProject extends IDomainId {
 	users: IUserProject[];
 	projectStatusId: string;
 	projectStatus: IProjectStatus;
+	projectTypeId: string;
+	projectType: IProjectType;
 	createdAt: string;
 }

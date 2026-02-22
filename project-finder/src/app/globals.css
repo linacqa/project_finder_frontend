@@ -80,3 +80,41 @@
     flex-wrap: wrap;
     gap: 16px;
 }
+
+.grid-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1rem;
+}
+
+.tt-tag {
+	font-size: 1rem;
+	padding: 0.4rem 1rem;
+}
+
+.row {
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.col-md-8 {
+	flex: 0 0 auto;
+	max-width: 66.666667%;
+}
+
+.col-md-4 {
+	flex: 0 0 auto;
+	max-width: 33.333333%;
+}
+/* make md-cols full width on narrow viewports so they wrap/stack */
+@media (max-width: 768px) {
+    .col-md-8,
+    .col-md-4 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+.border-bottom-gray {
+    border-bottom: 1px solid #6e7184;
+}

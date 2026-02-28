@@ -189,6 +189,19 @@ export default function ProjectDetails({
 												>
 													Peamine juhendaja
 												</Heading>
+												{(!project?.users?.some(
+														(u) =>
+															u.userProjectRole
+																.name ===
+															"Supervisor",
+													)
+													&&
+													project?.supervisor === null || project?.supervisor === ""
+												) && (
+													<div className="text-muted">
+														Puudub
+													</div>
+												)}
 												{project?.users
 													?.filter(
 														(u) =>
@@ -198,11 +211,10 @@ export default function ProjectDetails({
 													)
 													.map((u, index) => (
 														<div key={index}>
-															{u.user.firstName}{" "}
-															{u.user.lastName}
+															{u.user.firstName} {u.user.lastName} ({u.user.email})
 														</div>
 													))}
-												{project?.supervisor ? (
+												{project?.supervisor && (
 													<div>
 														<Heading
 															as="h3"
@@ -213,13 +225,22 @@ export default function ProjectDetails({
 														</Heading>
 														{project.supervisor}
 													</div>
-												) : (
+												)}
+											</div>
+
+											{(!project?.users?.some(
+														(u) =>
+															u.userProjectRole
+																.name ===
+															"External Supervisor",
+													)
+													&&
+													project?.externalSupervisor === null || project?.externalSupervisor === ""
+												) && (
 													<div className="text-muted">
 														Puudub
 													</div>
 												)}
-											</div>
-
 											{project?.users
 												?.filter(
 													(u) =>
@@ -229,8 +250,7 @@ export default function ProjectDetails({
 												)
 												.map((u, index) => (
 													<div key={index}>
-														{u.user.firstName}{" "}
-														{u.user.lastName}
+														{u.user.firstName} {u.user.lastName} ({u.user.email})
 													</div>
 												))}
 

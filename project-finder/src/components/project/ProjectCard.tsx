@@ -99,9 +99,12 @@ export default function ProjectCard({
 					</div>
 
 					<p className="text-sm text-accent-second mt-2">
-						Lubatud tiimi suurus: {teamSizeMin} - {teamSizeMax}
+							Lubatud tiimi suurus:{" "}
+							{teamSizeMin === teamSizeMax
+								? teamSizeMin
+								: `${teamSizeMin} - ${teamSizeMax}`}
 					</p>
-					{deadline.trim() !== "" && (
+					{deadline && deadline.trim() !== "" && (
 						<p className="text-sm mt-2">
 							Tähtaeg:{" "}
 							{new Date(deadline).toLocaleDateString("et-EE", {

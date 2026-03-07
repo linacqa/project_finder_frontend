@@ -1,7 +1,10 @@
 "use client";
+import { AccountContext } from "@/context/AccountContext";
+import { ApplicationService } from "@/services/ApplicationService";
 import { ProjectService } from "@/services/ProjectService";
+import { IApplication } from "@/types/domain/IApplication";
 import { IProject } from "@/types/domain/IProject";
-import { use, useEffect, useState } from "react";
+import { use, useContext, useEffect, useState } from "react";
 import {
 	Heading,
 	Separator,
@@ -9,6 +12,7 @@ import {
 	StatusTag,
 	Tag,
 	TagVariants,
+	TTNewButton,
 	TTNewCard,
 	TTNewCardContent,
 	TTNewContainer,
@@ -21,6 +25,9 @@ export default function ProjectDetails({
 }) {
 	const projectId = use(params).id;
 	const [project, setProject] = useState<IProject | null>(null);
+	const [application, setApplication] = useState<IApplication | null>(null);
+
+	const { accountInfo, setAccountInfo } = useContext(AccountContext);
 
 	useEffect(() => {
 		const projectService = new ProjectService();
@@ -29,7 +36,34 @@ export default function ProjectDetails({
 				setProject(res.data);
 			}
 		});
+
+		const applicationService = new ApplicationService();
+		applicationService
+			.getCurrentUsersApplicationByProjectIdAsync(projectId)
+			.then((res) => {
+				if (res && res.data) {
+					setApplication(res.data);
+				}
+			});
 	}, [projectId]);
+
+	const addApplication = () => {
+		const applicationService = new ApplicationService();
+		try {
+			applicationService
+				.addAsync({
+					projectId: projectId,
+					groupId: null,
+				})
+				.then((res) => {
+					if (res && res.data) {
+						console.log("Application added successfully");
+					}
+				});
+		} catch (err) {
+			console.log("Something went wrong when applying for the project");
+		}
+	};
 
 	return (
 		<>
@@ -53,7 +87,7 @@ export default function ProjectDetails({
 						)?.user.lastName
 					}
 				</Heading>
-				{project?.client !== "" && (
+				{project?.client && project.client !== "" && (
 					<Heading as="h2" visual="h6" className="mb-3">
 						Klient: {project?.client}
 					</Heading>
@@ -87,46 +121,85 @@ export default function ProjectDetails({
 					</div>
 
 					<div className="col-md-4">
+						{accountInfo?.role === "student" && (
+							<TTNewCard className="mb-3">
+								<TTNewCardContent>
+									<div className="d-flex flex-column gap-1">
+										{!application &&
+											project?.minStudents === 1 && (
+												<TTNewButton
+													onClick={addApplication}
+												>
+													Kandideeri üksi
+												</TTNewButton>
+											)}
+										{application && (
+											<>
+												<Heading as="h3" visual="h6">
+													Teie kandideerimine:
+												</Heading>
+												<div className="mb-3">
+													{!application.acceptedAt &&
+														!application.declinedAt && (
+															<Tag
+																text={"Pending"}
+																variant={
+																	TagVariants.WARNING
+																}
+															/>
+														)}
+													{application.acceptedAt && (
+														<Tag
+															text={`Accepted at ${new Date(
+																application.acceptedAt,
+															).toLocaleDateString(
+																"et-EE",
+																{
+																	year: "numeric",
+																	month: "2-digit",
+																	day: "2-digit",
+																},
+															)}`}
+															variant={
+																TagVariants.SUCCESS
+															}
+														/>
+													)}
+													{application.declinedAt && (
+														<Tag
+															text={`Declined at ${new Date(
+																application.declinedAt,
+															).toLocaleDateString(
+																"et-EE",
+																{
+																	year: "numeric",
+																	month: "2-digit",
+																	day: "2-digit",
+																},
+															)}`}
+															variant={
+																TagVariants.DANGER
+															}
+														/>
+													)}
+												</div>
+												<TTNewButton
+													iconRight="delete"
+													variant="danger"
+													hidden
+												>
+													Kustuta
+												</TTNewButton>
+											</>
+										)}
+									</div>
+								</TTNewCardContent>
+							</TTNewCard>
+						)}
 						<TTNewCard>
 							<TTNewCardContent>
 								<div className="d-flex flex-column gap-3">
-									{/* <div>
-										<Heading
-											as="h2"
-											visual="h4"
-											className="mb-2"
-										>
-											Sildid
-										</Heading>
-										<div className="d-flex gap-2 flex-wrap">
-											{project?.tags?.map(
-												(tag, index) => (
-													// <StatusTag
-													// 	key={index}
-													// 	type={STATUS_TYPE.INFO}
-													// >
-													// 	{tag.name}
-													// </StatusTag>
-													<Tag
-														key={index}
-														text={tag.name}
-														variant={
-															TagVariants.PRIMARY
-														}
-														as="div"
-													/>
-												),
-											)}
-										</div>
-									</div> */}
 									<div>
-										{/* <Heading
-											as="h2"
-											visual="h4"
-											className="mb-2"
-										>
-											Juhendajad
-										</Heading> */}
 										{project?.projectStatus && (
 											<div className="mb-3 d-flex flex-wrap gap-1">
 												<Tag
@@ -161,15 +234,16 @@ export default function ProjectDetails({
 													}
 													as="div"
 												/>
-												{(!project?.users?.some(
-														(u) =>
-															u.userProjectRole
-																.name ===
-															"Supervisor",
-													)
-													&&
-													project?.supervisor === null || project?.supervisor === ""
-												) && (
+												{((!project?.users?.some(
+													(u) =>
+														u.userProjectRole
+															.name ===
+														"Supervisor",
+												) &&
+													project?.supervisor ===
+														null) ||
+													project?.supervisor ===
+														"") && (
 													<Tag
 														text="Juhendaja puudub"
 														variant={
@@ -189,15 +263,16 @@ export default function ProjectDetails({
 												>
 													Peamine juhendaja
 												</Heading>
-												{(!project?.users?.some(
-														(u) =>
-															u.userProjectRole
-																.name ===
-															"Supervisor",
-													)
-													&&
-													project?.supervisor === null || project?.supervisor === ""
-												) && (
+												{((!project?.users?.some(
+													(u) =>
+														u.userProjectRole
+															.name ===
+														"Supervisor",
+												) &&
+													project?.supervisor ===
+														null) ||
+													project?.supervisor ===
+														"") && (
 													<div className="text-muted">
 														Puudub
 													</div>
@@ -211,36 +286,38 @@ export default function ProjectDetails({
 													)
 													.map((u, index) => (
 														<div key={index}>
-															{u.user.firstName} {u.user.lastName} ({u.user.email})
+															{u.user.firstName}{" "}
+															{u.user.lastName} (
+															{u.user.email})
 														</div>
 													))}
 												{project?.supervisor && (
 													<div>
-														<Heading
+														{/* <Heading
 															as="h3"
 															visual="h6"
 															className="mb-2"
 														>
 															Peamine juhendaja
-														</Heading>
+														</Heading> */}
 														{project.supervisor}
 													</div>
 												)}
 											</div>
 
-											{(!project?.users?.some(
-														(u) =>
-															u.userProjectRole
-																.name ===
-															"External Supervisor",
-													)
-													&&
-													project?.externalSupervisor === null || project?.externalSupervisor === ""
-												) && (
-													<div className="text-muted">
-														Puudub
-													</div>
-												)}
+											{((!project?.users?.some(
+												(u) =>
+													u.userProjectRole.name ===
+													"External Supervisor",
+											) &&
+												project?.externalSupervisor ===
+													null) ||
+												project?.externalSupervisor ===
+													"") && (
+												<div className="text-muted">
+													Puudub
+												</div>
+											)}
 											{project?.users
 												?.filter(
 													(u) =>
@@ -250,7 +327,9 @@ export default function ProjectDetails({
 												)
 												.map((u, index) => (
 													<div key={index}>
-														{u.user.firstName} {u.user.lastName} ({u.user.email})
+														{u.user.firstName}{" "}
+														{u.user.lastName} (
+														{u.user.email})
 													</div>
 												))}
 
@@ -288,17 +367,26 @@ export default function ProjectDetails({
 													: `${project?.minStudents} - ${project?.maxStudents}`}
 											</p>
 										</div>
-										<div className="d-flex mb-2">
-											<p className="me-2 text-bold mb-2">
-												Tähtaeg:
-											</p>
-											<p className="text-secondary-dark text-bold mb-0">
-												{project?.deadline &&
-													new Date(
+
+										{project?.deadline && (
+											<div className="d-flex mb-2">
+												<p className="me-2 text-bold mb-2">
+													Tähtaeg:
+												</p>
+												<p className="text-secondary-dark text-bold mb-0">
+													{new Date(
 														project.deadline,
-													).toLocaleDateString()}
-											</p>
-										</div>
+													).toLocaleDateString(
+														"et-EE",
+														{
+															year: "numeric",
+															month: "2-digit",
+															day: "2-digit",
+														},
+													)}
+												</p>
+											</div>
+										)}
 										<div className="d-flex">
 											<p className="me-2 text-bold mb-0">
 												Loodud:
@@ -307,7 +395,14 @@ export default function ProjectDetails({
 												{project?.createdAt &&
 													new Date(
 														project.createdAt,
-													).toLocaleDateString()}
+													).toLocaleDateString(
+														"et-EE",
+														{
+															year: "numeric",
+															month: "2-digit",
+															day: "2-digit",
+														},
+													)}
 											</p>
 										</div>
 									</div>

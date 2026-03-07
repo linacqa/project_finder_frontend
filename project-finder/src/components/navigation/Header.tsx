@@ -44,6 +44,16 @@ export default function Header() {
 										},
 									]
 								: []),
+							...(accountInfo?.jwt &&
+							(accountInfo.role === "student" ||
+								accountInfo.role === "teacher")
+								? [
+										{
+											children: "All Projects",
+											href: "/allProjects",
+										},
+									]
+								: []),
 							...(accountInfo?.jwt && accountInfo.role === "admin"
 								? [
 										{

@@ -23,6 +23,7 @@ import {
 	TTNewContainer,
 } from "taltech-styleguide";
 import dayjs, { Dayjs } from "dayjs";
+import { useRouter } from "next/router";
 
 export default function AddProject() {
 	const [project, setProject] = useState<IProjectAdd>({
@@ -39,7 +40,7 @@ export default function AddProject() {
 		maxStudents: 1,
 		projectTypeId: "",
 		projectStatusId: "",
-		deadline: "",
+		deadline: null,
 		folderIds: [],
 		tagIds: [],
 		stepIds: [],
@@ -86,6 +87,8 @@ export default function AddProject() {
 	const [loadingFolders, setLoadingFolders] = useState(false);
 
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+	const router = useRouter();
 
 	useEffect(() => {
 		let mounted = true;
@@ -247,7 +250,7 @@ export default function AddProject() {
 		const projectService = new ProjectService();
 		projectService.addAsync(project).then((res) => {
 			if (res && res.data) {
-				// router.push("/admin/projects");
+				router.push("/admin/projects");
 				console.log("Project created with id: ", res.data.id);
 			}
 		});

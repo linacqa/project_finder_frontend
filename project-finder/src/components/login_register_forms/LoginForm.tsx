@@ -61,6 +61,7 @@ export default function LoginForm() {
 				firstName: userInfo.data!.firstName,
 				lastName: userInfo.data!.lastName,
 				role: userInfo.data!.role,
+				userId: userInfo.data!.id,
 			});
 			router.push("/");
 		} catch (error) {

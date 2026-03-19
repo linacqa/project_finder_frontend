@@ -54,6 +54,15 @@ export default function Header() {
 										},
 									]
 								: []),
+							...(accountInfo?.jwt &&
+							(accountInfo.role === "student")
+								? [
+										{
+											children: "Groups",
+											href: "/groups",
+										},
+									]
+								: []),
 							...(accountInfo?.jwt && accountInfo.role === "admin"
 								? [
 										{

@@ -5,6 +5,7 @@ import { createContext } from "react";
 export interface IAccountInfo {
 	jwt?: string;
 	refreshToken?: string;
+	userId?: string;
 	firstName?: string;
 	lastName?: string;
 	role?: "admin" | "user" | "student" | "teacher";

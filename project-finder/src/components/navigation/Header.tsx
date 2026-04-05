@@ -101,6 +101,10 @@ export default function Header() {
 										href: "/my-thesis",
 									},
 									{
+										children: "Minu kutsed",
+										href: "/myInvitations",
+									},
+									{
 										children: "Logi välja",
 										href: "/",
 										onClick: handleLogout,

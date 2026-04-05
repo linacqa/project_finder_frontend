@@ -85,6 +85,7 @@ export default function SubmitIdea() {
 					<form onSubmit={(e) => {
 						e.preventDefault();
 						console.log(formData);
+						// TODO: send data to email
 					}}>
 						<FormGroup controlId="titleInEstonian">
 							<FormLabel>Pealkiri eesti keeles</FormLabel>

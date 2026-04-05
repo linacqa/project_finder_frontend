@@ -15,6 +15,7 @@ export default function AppState({
 		localStorage.setItem("_firstName", value.firstName || "");
 		localStorage.setItem("_lastName", value.lastName || "");
 		localStorage.setItem("_role", value.role || "");
+		localStorage.setItem("_userId", value.userId || "");
 	};
 
 	useEffect(() => {
@@ -23,6 +24,7 @@ export default function AppState({
 		const role = localStorage.getItem("_role");
 		const jwt = localStorage.getItem("_jwt");
 		const refreshToken = localStorage.getItem("_refreshToken");
+		const userId = localStorage.getItem("_userId");
 
 		if (jwt && refreshToken && firstName && lastName && role) {
 			setAccountInfo({
@@ -31,6 +33,7 @@ export default function AppState({
 				firstName: firstName || undefined,
 				lastName: lastName || undefined,
 				role: (role as IAccountInfo["role"]) || undefined,
+				userId: userId || undefined,
 			});
 		} else {
 			setAccountInfo({});

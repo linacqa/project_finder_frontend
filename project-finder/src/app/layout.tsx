@@ -13,14 +13,14 @@ export default function RootLayout({
 	children: React.ReactNode;
 }) {
 	return (
-		<html lang="en">
+		<html lang="et">
 			<head>
 				<meta charSet="UTF-8" />
 				<meta
 					name="viewport"
 					content="width=device-width, initial-scale=1.0"
 				/>
-				<title>Lõputöö teemad | IT-College</title>
+				<title>Projektid | IT Kolledž</title>
 			</head>
 			<body>
 				<AppState>

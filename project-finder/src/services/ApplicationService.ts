@@ -15,6 +15,8 @@ export class ApplicationService extends BaseEntityService<IApplication, IApplica
 					`${this.basePath}/my/${projectId}`,
 				)
 
+				console.log('getCurrentUsersApplicationByProjectIdAsync response', response)
+
 				if (response.status <= 300) {
 					return {
 						statusCode: response.status,

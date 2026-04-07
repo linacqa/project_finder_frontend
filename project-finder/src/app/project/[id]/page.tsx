@@ -1,11 +1,15 @@
 "use client";
 import { AccountContext } from "@/context/AccountContext";
 import { ApplicationService } from "@/services/ApplicationService";
+import { GroupService } from "@/services/GroupService";
 import { ProjectService } from "@/services/ProjectService";
 import { IApplication } from "@/types/domain/IApplication";
+import { IGroup } from "@/types/domain/IGroup";
 import { IProject } from "@/types/domain/IProject";
+import Link from "next/link";
 import { use, useContext, useEffect, useState } from "react";
 import {
+	CustomInput,
 	Heading,
 	Separator,
 	STATUS_TYPE,
@@ -16,6 +20,7 @@ import {
 	TTNewCard,
 	TTNewCardContent,
 	TTNewContainer,
+	TTNewSelect,
 } from "taltech-styleguide";
 
 export default function ProjectDetails({
@@ -26,6 +31,10 @@ export default function ProjectDetails({
 	const projectId = use(params).id;
 	const [project, setProject] = useState<IProject | null>(null);
 	const [application, setApplication] = useState<IApplication | null>(null);
+
+	const [isGroupApplication, setIsGroupApplication] = useState(false);
+	const [groups, setGroups] = useState<IGroup[]>([]);
+	const [selectedGroupId, setSelectedGroupId] = useState<{ label: string; value: string } | null>(null);
 
 	const { accountInfo, setAccountInfo } = useContext(AccountContext);
 
@@ -45,15 +54,27 @@ export default function ProjectDetails({
 					setApplication(res.data);
 				}
 			});
+
+		const groupService = new GroupService();
+		groupService.getAllMatchingProjectTeamSizeAsync(projectId).then((res) => {
+			if (res && res.data) {
+				setGroups(res.data);
+			}
+		});
 	}, [projectId]);
 
 	const addApplication = () => {
+		if (isGroupApplication && !selectedGroupId) {
+			alert("Palun valige grupp, millega kandideerite");
+			return;
+		}
+		console.log(selectedGroupId);
 		const applicationService = new ApplicationService();
 		try {
 			applicationService
 				.addAsync({
 					projectId: projectId,
-					groupId: null,
+					groupId: isGroupApplication ? selectedGroupId?.value ?? null : null,
 				})
 				.then((res) => {
 					if (res && res.data) {
@@ -125,19 +146,61 @@ export default function ProjectDetails({
 							<TTNewCard className="mb-3">
 								<TTNewCardContent>
 									<div className="d-flex flex-column gap-1">
-										{!application &&
-											project?.minStudents === 1 && (
-												<TTNewButton
-													onClick={addApplication}
-												>
-													Kandideeri üksi
-												</TTNewButton>
-											)}
+										{!application && (
+											<>
+												<CustomInput
+													className="mb-2"
+													label="Kandideeri grupina"
+													type="checkbox"
+													checked={isGroupApplication}
+													onChange={(e) =>
+														setIsGroupApplication(
+															e.target.checked,
+														)
+													}
+												/>
+												{isGroupApplication && project?.maxStudents &&
+													project?.maxStudents >=
+														2 && (
+														<TTNewSelect
+															className="mb-3"
+															options={groups.map((g) => ({
+																value: g.id,
+																label: g.name,
+															}))}
+															placeholder="Vali grupp"
+															value={
+																selectedGroupId
+															}
+															onChange={(value) =>
+																setSelectedGroupId(
+																	value,
+																)
+															}
+														/>
+													)}
+												{project?.minStudents === 1 && (
+													<TTNewButton
+														onClick={addApplication}
+													>
+														Kandideeri
+													</TTNewButton>
+												)}
+											</>
+										)}
 										{application && (
 											<>
 												<Heading as="h3" visual="h6">
 													Teie kandideerimine:
 												</Heading>
+												{application.group && (
+													<p>
+														Grupiga:{" "}
+														<Link href={`/groups/${application.group.id}`}>
+															{application.group.name}
+														</Link>
+													</p>
+												)}
 												<div className="mb-3">
 													{!application.acceptedAt &&
 														!application.declinedAt && (

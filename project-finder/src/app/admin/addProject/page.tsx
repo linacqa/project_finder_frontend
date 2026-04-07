@@ -23,7 +23,7 @@ import {
 	TTNewContainer,
 } from "taltech-styleguide";
 import dayjs, { Dayjs } from "dayjs";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 export default function AddProject() {
 	const [project, setProject] = useState<IProjectAdd>({
@@ -250,7 +250,7 @@ export default function AddProject() {
 		const projectService = new ProjectService();
 		projectService.addAsync(project).then((res) => {
 			if (res && res.data) {
-				router.push("/admin/projects");
+				router.push("/admin/allProjects");
 				console.log("Project created with id: ", res.data.id);
 			}
 		});

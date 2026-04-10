@@ -4,7 +4,6 @@ import TagCard from "@/components/tags/TagCard";
 import { TagService } from "@/services/TagService";
 import { ITag } from "@/types/domain/ITag";
 import { useEffect, useState } from "react";
-import { set } from "react-hook-form";
 import {
 	ButtonGroup,
 	Heading,

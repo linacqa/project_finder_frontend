@@ -4,7 +4,6 @@ import StepCard from "@/components/steps/StepCard";
 import { StepService } from "@/services/StepService";
 import { IStep } from "@/types/domain/IStep";
 import { useEffect, useState } from "react";
-import { set } from "react-hook-form";
 import {
 	ButtonGroup,
 	Heading,

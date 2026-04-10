@@ -35,12 +35,14 @@ export default function GroupDetails({
 	} | null>(null);
 	const [inviteRole, setInviteRole] = useState("");
 
-	const { accountInfo, setAccountInfo } = useContext(AccountContext);
+	const { accountInfo } = useContext(AccountContext);
+
+	const groupService = new GroupService();
+	const userService = new UserService();
+	const invitationService = new InvitationService();
 
 	const handleInvite = async () => {
 		if (!selectedStudent || inviteRole.trim() === "") return;
-
-		const invitationService = new InvitationService();
 		const res = await invitationService.addAsync({
 			groupId: groupId,
 			toUserId: selectedStudent.value,
@@ -57,14 +59,12 @@ export default function GroupDetails({
 
 	useEffect(() => {
 		let mounted = true;
-		const groupService = new GroupService();
 		groupService.getByIdAsync(groupId).then((res) => {
 			if (res && res.data) {
 				setGroup(res.data);
 				console.log(res.data);
 			}
 		});
-		const userService = new UserService();
 		setLoadingStudents(true);
 		userService
 			.getAllStudentsAsync()

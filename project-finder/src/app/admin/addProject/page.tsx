@@ -22,7 +22,7 @@ import {
 	TTNewCardContent,
 	TTNewContainer,
 } from "taltech-styleguide";
-import dayjs, { Dayjs } from "dayjs";
+import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
 
 export default function AddProject() {
@@ -83,16 +83,22 @@ export default function AddProject() {
 	const [steps, setSteps] = useState<{ label: string; id: string }[]>([]);
 	const [loadingSteps, setLoadingSteps] = useState(false);
 
-	const [folders, setFolders] = useState<{ label: string; id: string }[]>([]);
-	const [loadingFolders, setLoadingFolders] = useState(false);
+	// const [folders, setFolders] = useState<{ label: string; id: string }[]>([]);
+	// const [loadingFolders, setLoadingFolders] = useState(false);
 
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
 
 	const router = useRouter();
 
+	const projectTypeService = new ProjectTypeService();
+	const projectStatusService = new ProjectStatusService();
+	const tagService = new TagService();
+	const userService = new UserService();
+	// const folderService = new FolderService();
+	const stepService = new StepService();
+
 	useEffect(() => {
 		let mounted = true;
-		const projectTypeService = new ProjectTypeService();
 		setLoadingProjectTypes(true);
 		projectTypeService
 			.getAllAsync()
@@ -109,7 +115,6 @@ export default function AddProject() {
 				if (mounted) setLoadingProjectTypes(false);
 			});
 
-		const projectStatusService = new ProjectStatusService();
 		setLoadingProjectStatuses(true);
 		projectStatusService
 			.getAllAsync()
@@ -126,7 +131,6 @@ export default function AddProject() {
 				if (mounted) setLoadingProjectStatuses(false);
 			});
 
-		const tagService = new TagService();
 		setLoadingTags(true);
 		tagService
 			.getAllAsync()
@@ -143,7 +147,6 @@ export default function AddProject() {
 				if (mounted) setLoadingTags(false);
 			});
 
-		const userService = new UserService();
 		setLoadingAuthors(true);
 		userService
 			.getAllAsync()
@@ -194,27 +197,25 @@ export default function AddProject() {
 				if (mounted) setLoadingSupervisors(false);
 			});
 
-		const folderService = new FolderService();
-		setLoadingFolders(true);
-		folderService
-			.getAllAsync()
-			.then((res) => {
-				if (!mounted) return;
-				if (res && res.data) {
-					setFolders(
-						res.data.map((f) => ({
-							label: f.name,
-							id: f.id,
-						})),
-					);
-				}
-			})
-			.catch((err) => console.error(err))
-			.finally(() => {
-				if (mounted) setLoadingFolders(false);
-			});
+		// setLoadingFolders(true);
+		// folderService
+		// 	.getAllAsync()
+		// 	.then((res) => {
+		// 		if (!mounted) return;
+		// 		if (res && res.data) {
+		// 			setFolders(
+		// 				res.data.map((f) => ({
+		// 					label: f.name,
+		// 					id: f.id,
+		// 				})),
+		// 			);
+		// 		}
+		// 	})
+		// 	.catch((err) => console.error(err))
+		// 	.finally(() => {
+		// 		if (mounted) setLoadingFolders(false);
+		// 	});
 
-		const stepService = new StepService();
 		setLoadingSteps(true);
 		stepService
 			.getAllAsync()
@@ -904,7 +905,7 @@ export default function AddProject() {
 								/>
 							</div>
 
-							<div>
+							{/* <div>
 								<Heading
 									className="admin-thesis-details-titles"
 									as="h4"
@@ -965,7 +966,7 @@ export default function AddProject() {
 										});
 									}}
 								/>
-							</div>
+							</div> */}
 
 							<div>
 								<form

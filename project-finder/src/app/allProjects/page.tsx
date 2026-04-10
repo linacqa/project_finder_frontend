@@ -8,8 +8,9 @@ import { TTNewContainer } from "taltech-styleguide";
 export default function AllProjects() {
 	const [projects, setProjects] = useState<IProject[]>([]);
 
+	const projectService = new ProjectService();
+
 	useEffect(() => {
-		const projectService = new ProjectService();
 		projectService.getAllAsync().then((res) => {
 			setProjects(res.data as IProject[]);
 		});

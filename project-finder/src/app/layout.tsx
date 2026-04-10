@@ -5,6 +5,11 @@ import "./globals.css";
 import Header from "@/components/navigation/Header";
 import dynamic from "next/dynamic";
 
+// export const metadata = {
+// 	title: "Projektid | IT Kolledž",
+// 	description: "Praktika projektide infosüsteem IT Kolledži jaoks.",
+// };
+
 const AppState = dynamic(() => import("@/components/AppState"), { ssr: false });
 
 export default function RootLayout({
@@ -25,7 +30,9 @@ export default function RootLayout({
 			<body>
 				<AppState>
 					<Header />
-					<main className="container">{children}</main>
+					<main className="container">
+						{children}
+					</main>
 				</AppState>
 			</body>
 		</html>

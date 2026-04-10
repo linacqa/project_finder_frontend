@@ -26,6 +26,8 @@ export default function AppState({
 		const refreshToken = localStorage.getItem("_refreshToken");
 		const userId = localStorage.getItem("_userId");
 
+		// Temporary solution
+		// TODO: don't use localStorage for this, cause user can manually change data in localStorage
 		if (jwt && refreshToken && firstName && lastName && role) {
 			setAccountInfo({
 				jwt,

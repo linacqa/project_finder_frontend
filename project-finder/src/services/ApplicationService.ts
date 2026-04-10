@@ -9,6 +9,32 @@ export class ApplicationService extends BaseEntityService<IApplication, IApplica
 		super('applications');
 	}
 
+	async getCurrentUsersAllAsync(): Promise<IResultObject<IApplication[]>> {
+		try {
+			const response = await this.axiosInstance.get<IApplication[]>(this.basePath)
+
+			console.log('getAll for current user response', response)
+
+			if (response.status <= 300) {
+				return {
+					statusCode: response.status,
+					data: response.data
+				}
+			}
+
+			return {
+				statusCode: response.status,
+				errors: [(response.status.toString() + ' ' + response.statusText).trim()],
+			}
+		} catch (error) {
+			console.log('error: ', (error as AxiosError).message)
+			return {
+				statusCode: (error as AxiosError).status ?? 0,
+				errors: [(error as AxiosError).code ?? "???"],
+			}
+		}
+	}
+
 	async getCurrentUsersApplicationByProjectIdAsync(projectId: string): Promise<IResultObject<IApplication>> {
 			try {
 				const response = await this.axiosInstance.get<IApplication>(
@@ -36,4 +62,52 @@ export class ApplicationService extends BaseEntityService<IApplication, IApplica
 				}
 			}
 		}
+
+	async acceptByIdAsync(id: string): Promise<IResultObject<IApplication>> {
+		try {
+			const response = await this.axiosInstance.put<IApplication>(`${this.basePath}/${id}/accept`)
+
+			if (response.status <= 300) {
+				return {
+					statusCode: response.status,
+					data: response.data
+				}
+			}
+
+			return {
+				statusCode: response.status,
+				errors: [(response.status.toString() + ' ' + response.statusText).trim()],
+			}
+		} catch (error) {
+			console.log('error: ', (error as AxiosError).message)
+			return {
+				statusCode: (error as AxiosError).status ?? 0,
+				errors: [(error as AxiosError).code ?? "???"],
+			}
+		}
+	}
+
+	async declineByIdAsync(id: string): Promise<IResultObject<IApplication>> {
+		try {
+			const response = await this.axiosInstance.put<IApplication>(`${this.basePath}/${id}/decline`)
+
+			if (response.status <= 300) {
+				return {
+					statusCode: response.status,
+					data: response.data
+				}
+			}
+
+			return {
+				statusCode: response.status,
+				errors: [(response.status.toString() + ' ' + response.statusText).trim()],
+			}
+		} catch (error) {
+			console.log('error: ', (error as AxiosError).message)
+			return {
+				statusCode: (error as AxiosError).status ?? 0,
+				errors: [(error as AxiosError).code ?? "???"],
+			}
+		}
+	}
 }

@@ -1,9 +1,11 @@
 "use client";
 import { AccountContext } from "@/context/AccountContext";
 import { ApplicationService } from "@/services/ApplicationService";
+import { CommentService } from "@/services/CommentService";
 import { GroupService } from "@/services/GroupService";
 import { ProjectService } from "@/services/ProjectService";
 import { IApplication } from "@/types/domain/IApplication";
+import { IComment } from "@/types/domain/IComment";
 import { IGroup } from "@/types/domain/IGroup";
 import { IProject } from "@/types/domain/IProject";
 import Link from "next/link";
@@ -11,6 +13,7 @@ import { use, useContext, useEffect, useState } from "react";
 import {
 	CustomInput,
 	Heading,
+	Input,
 	Separator,
 	STATUS_TYPE,
 	StatusTag,
@@ -31,22 +34,30 @@ export default function ProjectDetails({
 	const projectId = use(params).id;
 	const [project, setProject] = useState<IProject | null>(null);
 	const [application, setApplication] = useState<IApplication | null>(null);
+	const [comments, setComments] = useState<IComment[]>([]);
+	const [newComment, setNewComment] = useState("");
 
 	const [isGroupApplication, setIsGroupApplication] = useState(false);
 	const [groups, setGroups] = useState<IGroup[]>([]);
-	const [selectedGroupId, setSelectedGroupId] = useState<{ label: string; value: string } | null>(null);
+	const [selectedGroupId, setSelectedGroupId] = useState<{
+		label: string;
+		value: string;
+	} | null>(null);
 
 	const { accountInfo, setAccountInfo } = useContext(AccountContext);
 
+	const projectService = new ProjectService();
+	const applicationService = new ApplicationService();
+	const groupService = new GroupService();
+	const commentService = new CommentService();
+
 	useEffect(() => {
-		const projectService = new ProjectService();
 		projectService.getByIdAsync(projectId).then((res) => {
 			if (res && res.data) {
 				setProject(res.data);
 			}
 		});
 
-		const applicationService = new ApplicationService();
 		applicationService
 			.getCurrentUsersApplicationByProjectIdAsync(projectId)
 			.then((res) => {
@@ -55,10 +66,17 @@ export default function ProjectDetails({
 				}
 			});
 
-		const groupService = new GroupService();
-		groupService.getAllMatchingProjectTeamSizeAsync(projectId).then((res) => {
+		groupService
+			.getAllMatchingProjectTeamSizeAsync(projectId)
+			.then((res) => {
+				if (res && res.data) {
+					setGroups(res.data);
+				}
+			});
+
+		commentService.getAllByProjectIdAsync(projectId).then((res) => {
 			if (res && res.data) {
-				setGroups(res.data);
+				setComments(res.data);
 			}
 		});
 	}, [projectId]);
@@ -74,7 +92,9 @@ export default function ProjectDetails({
 			applicationService
 				.addAsync({
 					projectId: projectId,
-					groupId: isGroupApplication ? selectedGroupId?.value ?? null : null,
+					groupId: isGroupApplication
+						? (selectedGroupId?.value ?? null)
+						: null,
 				})
 				.then((res) => {
 					if (res && res.data) {
@@ -84,6 +104,26 @@ export default function ProjectDetails({
 		} catch (err) {
 			console.log("Something went wrong when applying for the project");
 		}
+	};
+
+	const postComment = () => {
+		if (newComment.trim() === "") {
+			alert("Kommentaar ei saa olla tühi");
+			return;
+		}
+
+		commentService
+			.addAsync({
+				projectId: projectId,
+				content: newComment,
+				replyToCommentId: null,
+			})
+			.then((res) => {
+				if (res && res.data) {
+					console.log("Comment added successfully");
+					setNewComment("");
+				}
+			});
 	};
 
 	return (
@@ -138,7 +178,9 @@ export default function ProjectDetails({
 						<Heading as="h2" visual="h4" className="mb-2">
 							Kirjeldus
 						</Heading>
-						<p>{project?.description}</p>
+						<p style={{ whiteSpace: "pre-wrap" }}>
+							{project?.description}
+						</p>
 					</div>
 
 					<div className="col-md-4">
@@ -159,15 +201,18 @@ export default function ProjectDetails({
 														)
 													}
 												/>
-												{isGroupApplication && project?.maxStudents &&
+												{isGroupApplication &&
+													project?.maxStudents &&
 													project?.maxStudents >=
 														2 && (
 														<TTNewSelect
 															className="mb-3"
-															options={groups.map((g) => ({
-																value: g.id,
-																label: g.name,
-															}))}
+															options={groups.map(
+																(g) => ({
+																	value: g.id,
+																	label: g.name,
+																}),
+															)}
 															placeholder="Vali grupp"
 															value={
 																selectedGroupId
@@ -196,8 +241,13 @@ export default function ProjectDetails({
 												{application.group && (
 													<p>
 														Grupiga:{" "}
-														<Link href={`/groups/${application.group.id}`}>
-															{application.group.name}
+														<Link
+															href={`/groups/${application.group.id}`}
+														>
+															{
+																application
+																	.group.name
+															}
 														</Link>
 													</p>
 												)}
@@ -224,7 +274,7 @@ export default function ProjectDetails({
 																},
 															)}`}
 															variant={
-																TagVariants.SUCCESS
+																TagVariants.SUCCESS_FILLED
 															}
 														/>
 													)}
@@ -241,18 +291,18 @@ export default function ProjectDetails({
 																},
 															)}`}
 															variant={
-																TagVariants.DANGER
+																TagVariants.DANGER_FILLED
 															}
 														/>
 													)}
 												</div>
-												<TTNewButton
+												{/* <TTNewButton
 													iconRight="delete"
 													variant="danger"
 													hidden
 												>
 													Kustuta
-												</TTNewButton>
+												</TTNewButton> */}
 											</>
 										)}
 									</div>
@@ -469,6 +519,57 @@ export default function ProjectDetails({
 											</p>
 										</div>
 									</div>
+								</div>
+							</TTNewCardContent>
+						</TTNewCard>
+					</div>
+				</div>
+
+				{/* TODO: check that user is project member */}
+				{/* TODO: add option to reply to comments and show comment threads */}
+				<div className="row mt-3">
+					<div>
+						<Heading as="h2" visual="h4" className="mb-2">
+							Kommentaarid
+						</Heading>
+						{comments.map((comment) => (
+							<TTNewCard key={comment.id} className="mb-2">
+								<TTNewCardContent>
+									<p>{comment.content}</p>
+									<small className="text-muted">
+										{comment.user.firstName}{" "}
+										{comment.user.lastName} (
+										{comment.user.email})
+									</small>
+									<br />
+									<small className="text-muted">
+										{new Date(
+											comment.createdAt,
+										).toLocaleDateString("et-EE", {
+											year: "numeric",
+											month: "2-digit",
+											day: "2-digit",
+											hour: "2-digit",
+											minute: "2-digit",
+										})}
+									</small>
+								</TTNewCardContent>
+							</TTNewCard>
+						))}
+						<TTNewCard>
+							<TTNewCardContent>
+								<div className="d-flex flex-column gap-2">
+									<Input
+										as="textarea"
+										placeholder="Lisa kommentaar"
+										value={newComment}
+										onChange={(e) =>
+											setNewComment(e.target.value)
+										}
+									/>
+									<TTNewButton onClick={postComment}>
+										Postita
+									</TTNewButton>
 								</div>
 							</TTNewCardContent>
 						</TTNewCard>

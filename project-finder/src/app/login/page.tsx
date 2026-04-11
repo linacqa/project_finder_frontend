@@ -1,17 +1,11 @@
+"use client";
 import LoginForm from "@/components/login_register_forms/LoginForm";
-import RegisterForm from "@/components/login_register_forms/RegisterForm";
+import { TTNewContainer } from "taltech-styleguide";
 
 export default function Login() {
 	return (
-		<div className="login-container">
+		<TTNewContainer>
 			<LoginForm />
-
-			<div className="login-horizontal-divider">
-				<h2 className="login-grid-element">või</h2>
-			</div>
-			<div className="login-vertical-divider"></div>
-
-			<RegisterForm />
-		</div>
+		</TTNewContainer>
 	);
 }

@@ -5,7 +5,14 @@ import { AccountService } from "@/services/AccountService";
 import { useRouter } from "next/navigation";
 import { useContext, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { ButtonGroup, TTNewButton } from "taltech-styleguide";
+import {
+	ALERT_POSITION_TYPES,
+	ALERT_SIZE,
+	ALERT_STATUS_TYPE,
+	ButtonGroup,
+	TTNewAlert,
+	TTNewButton,
+} from "taltech-styleguide";
 
 export default function LoginForm() {
 	const accountService = new AccountService();
@@ -14,7 +21,10 @@ export default function LoginForm() {
 
 	const router = useRouter();
 
-	const [errorMessage, setErrorMessage] = useState("");
+	const [message, setMessage] = useState<{
+		type: string;
+		text: string;
+	} | null>(null);
 
 	type Inputs = {
 		email: string;
@@ -34,19 +44,23 @@ export default function LoginForm() {
 
 	const onSubmit: SubmitHandler<Inputs> = async (data: Inputs) => {
 		console.log(data);
-		setErrorMessage("Loading...");
+		setMessage({ type: "loading", text: "Laadin..." });
 
 		try {
 			var result = await accountService.loginAsync(
 				data.email,
 				data.password,
 			);
+			console.log(result);
 			if (result.errors) {
-				setErrorMessage(result.statusCode + " - " + result.errors[0]);
+				setMessage({
+					type: "error",
+					text: result.statusCode + " - " + result.errors[0],
+				});
 				return;
 			}
 
-			setErrorMessage("");
+			setMessage({ type: "success", text: "Sisselogimine õnnestus!" });
 
 			var accountInfo: IAccountInfo = {
 				jwt: result.data!.jwt,
@@ -65,7 +79,10 @@ export default function LoginForm() {
 			});
 			router.push("/");
 		} catch (error) {
-			setErrorMessage("Login failed - " + (error as Error).message);
+			setMessage({
+				type: "error",
+				text: "Sisselogimine ebaõnnestus - " + (error as Error).message,
+			});
 		}
 	};
 
@@ -74,9 +91,27 @@ export default function LoginForm() {
 			<div style={{ textAlign: "center", gridArea: "login" }}>
 				<h2>Logi sisse</h2>
 
-				{errorMessage}
+				{message && (
+					<div>
+						<TTNewAlert
+							position={ALERT_POSITION_TYPES.INLINE}
+							variant={
+								message.type === "error"
+									? ALERT_STATUS_TYPE.ERROR
+									: message.type === "success"
+										? ALERT_STATUS_TYPE.SUCCESS
+										: ALERT_STATUS_TYPE.INFO
+							}
+							dismissible
+							size={ALERT_SIZE.SMALL}
+							title={message.text}
+							onClose={() => setMessage(null)}
+						></TTNewAlert>
+					</div>
+				)}
 
 				<form onSubmit={handleSubmit(onSubmit)}>
+					{/* TODO: make fields less wide on desktop */}
 					<div
 						className="text-danger validation-summary-valid"
 						role="alert"
@@ -101,18 +136,18 @@ export default function LoginForm() {
 								data-valmsg-for="Input.Email"
 								data-valmsg-replace="true"
 							>
-								Required!
+								Kohustuslik!
 							</span>
 						)}
 					</div>
 					<div>
 						<label className="field-label" htmlFor="Input_Password">
-							Password
+							Parool
 						</label>
 						<input
 							className="login-field"
 							aria-required="true"
-							placeholder="password"
+							placeholder="parool"
 							type="password"
 							id="Input_Password"
 							autoComplete="current-password"
@@ -124,7 +159,7 @@ export default function LoginForm() {
 								data-valmsg-for="Input.Password"
 								data-valmsg-replace="true"
 							>
-								Required!
+								Kohustuslik!
 							</span>
 						)}
 					</div>
@@ -134,6 +169,23 @@ export default function LoginForm() {
 						onClick={handleSubmit(onSubmit)}
 					>
 						<TTNewButton variant="light">Logi sisse</TTNewButton>
+					</ButtonGroup>
+					{/* <ButtonGroup className="centered-button">
+						<TTNewButton
+							variant="secondary"
+							onClick={() => {}}
+						>
+							Logi sisse UNI-IDga
+						</TTNewButton>
+					</ButtonGroup> */}
+					<p>või</p>
+					<ButtonGroup className="centered-button">
+						<TTNewButton
+							variant="secondary"
+							onClick={() => router.push("/register")}
+						>
+							Loo konto
+						</TTNewButton>
 					</ButtonGroup>
 				</form>
 			</div>

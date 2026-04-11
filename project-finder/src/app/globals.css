@@ -5,14 +5,14 @@
 	justify-content: center;
 }
 
-.login-container {
+/* .login-container {
 	display: grid;
 	grid-template-columns: minmax(250px, 1fr) 20px minmax(250px, 1fr);
 	grid-template-rows: 40px auto;
 	grid-template-areas:
 		"login center-text register"
 		"login divider register";
-}
+} */
 
 .login-vertical-divider {
 	transform: translateX(20px);

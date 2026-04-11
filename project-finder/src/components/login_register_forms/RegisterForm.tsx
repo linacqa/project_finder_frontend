@@ -5,7 +5,7 @@ import { AccountService } from "@/services/AccountService";
 import { useRouter } from "next/navigation";
 import { useContext, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { ButtonGroup, CustomInput, TTNewButton } from "taltech-styleguide";
+import { ALERT_POSITION_TYPES, ALERT_SIZE, ALERT_STATUS_TYPE, ButtonGroup, CustomInput, TTNewAlert, TTNewButton } from "taltech-styleguide";
 
 export default function RegisterForm() {
 	const accountService = new AccountService();
@@ -14,14 +14,17 @@ export default function RegisterForm() {
 
 	const router = useRouter();
 
-	const [errorMessage, setErrorMessage] = useState("");
+	const [message, setMessage] = useState<{
+		type: string;
+		text: string;
+	} | null>(null);
 
 	const programOptions = [
 		"IT süsteemide arendus (IADB)",
 		"IT süsteemide administreerimine (IAAB)",
 		"Cyber Security Engineering (IVSB)",
-		"Infosüsteemide analüüs ja kavandamine (IAAM)"
-	]
+		"Infosüsteemide analüüs ja kavandamine (IAAM)",
+	];
 
 	type Inputs = {
 		email: string;
@@ -56,10 +59,10 @@ export default function RegisterForm() {
 
 	const onSubmit: SubmitHandler<Inputs> = async (data: Inputs) => {
 		console.log(data);
-		setErrorMessage("Loading...");
+		setMessage({ type: "loading", text: "Laadin..." });
 
 		if (data.password !== data.confirmPassword) {
-			setErrorMessage("Passwords do not match");
+			setMessage({ type: "error", text: "Paroolid ei kattu" });
 			return;
 		}
 
@@ -76,11 +79,11 @@ export default function RegisterForm() {
 				data.phoneNumber,
 			);
 			if (result.errors) {
-				setErrorMessage(result.statusCode + " - " + result.errors[0]);
+				setMessage({ type: "error", text: result.statusCode + " - " + result.errors[0] });
 				return;
 			}
 
-			setErrorMessage("");
+			setMessage({ type: "success", text: "Registreerimine õnnestus!" });
 
 			setAccountInfo!({
 				jwt: result.data!.jwt,
@@ -91,9 +94,10 @@ export default function RegisterForm() {
 			});
 			router.push("/");
 		} catch (error) {
-			setErrorMessage(
-				"Registration failed - " + (error as Error).message,
-			);
+			setMessage({
+				type: "error",
+				text: "Registreerimine ebaõnnestus - " + (error as Error).message,
+			});
 		}
 	};
 
@@ -101,7 +105,24 @@ export default function RegisterForm() {
 		<div style={{ textAlign: "center", gridArea: "register" }}>
 			<h2 className="mb-4">Registreeri</h2>
 
-			{errorMessage}
+			{message && (
+				<div>
+					<TTNewAlert
+						position={ALERT_POSITION_TYPES.INLINE}
+						variant={
+							message.type === "error"
+								? ALERT_STATUS_TYPE.ERROR
+								: message.type === "success"
+									? ALERT_STATUS_TYPE.SUCCESS
+									: ALERT_STATUS_TYPE.INFO
+						}
+						dismissible
+						size={ALERT_SIZE.SMALL}
+						title={message.text}
+						onClose={() => setMessage(null)}
+					></TTNewAlert>
+				</div>
+			)}
 
 			<form onSubmit={handleSubmit(onSubmit)}>
 				<div
@@ -111,12 +132,12 @@ export default function RegisterForm() {
 				></div>
 				<div>
 					<label className="field-label" htmlFor="Input_FirstName">
-						First Name
+						Eesnimi
 					</label>
 					<input
 						className="login-field"
 						aria-required="true"
-						placeholder="Name"
+						placeholder="Eesnimi"
 						autoComplete="first-name"
 						type="text"
 						id="Input_FirstName"
@@ -128,18 +149,18 @@ export default function RegisterForm() {
 							data-valmsg-for="Input.FirstName"
 							data-valmsg-replace="true"
 						>
-							Required!
+							Kohustuslik!
 						</span>
 					)}
 				</div>
 				<div>
 					<label className="field-label" htmlFor="Input_LastName">
-						Last Name
+						Perekonnanimi
 					</label>
 					<input
 						className="login-field"
 						aria-required="true"
-						placeholder="Surname"
+						placeholder="Perekonnanimi"
 						autoComplete="Surname"
 						type="text"
 						id="Input_LastName"
@@ -151,7 +172,7 @@ export default function RegisterForm() {
 							data-valmsg-for="Input.LastName"
 							data-valmsg-replace="true"
 						>
-							Required!
+							Kohustuslik!
 						</span>
 					)}
 				</div>
@@ -174,13 +195,13 @@ export default function RegisterForm() {
 							data-valmsg-for="Input.Email"
 							data-valmsg-replace="true"
 						>
-							Required!
+							Kohustuslik!
 						</span>
 					)}
 				</div>
 				<div>
 					<label className="field-label" htmlFor="Input_PhoneNumber">
-						Phone Number
+						Telefoninumber
 					</label>
 					<input
 						className="login-field"
@@ -196,18 +217,18 @@ export default function RegisterForm() {
 							data-valmsg-for="Input.PhoneNumber"
 							data-valmsg-replace="true"
 						>
-							Required!
+							Kohustuslik!
 						</span>
 					)}
 				</div>
 				<div>
 					<label className="field-label" htmlFor="Input_Password">
-						Password
+						Parool
 					</label>
 					<input
 						className="login-field"
 						aria-required="true"
-						placeholder="password"
+						placeholder="parool"
 						type="password"
 						id="Input_Password"
 						autoComplete="current-password"
@@ -219,7 +240,7 @@ export default function RegisterForm() {
 							data-valmsg-for="Input.Password"
 							data-valmsg-replace="true"
 						>
-							Required!
+							Kohustuslik!
 						</span>
 					)}
 				</div>
@@ -228,12 +249,12 @@ export default function RegisterForm() {
 						className="field-label"
 						htmlFor="Input_ConfirmPassword"
 					>
-						Confirm Password
+						Kinnita parool
 					</label>
 					<input
 						className="login-field"
 						aria-required="true"
-						placeholder="password"
+						placeholder="parool"
 						type="password"
 						id="Input_ConfirmPassword"
 						autoComplete="new-password"
@@ -245,109 +266,125 @@ export default function RegisterForm() {
 							data-valmsg-for="Input.ConfirmPassword"
 							data-valmsg-replace="true"
 						>
-							Required!
+							Kohustuslik!
 						</span>
 					)}
 				</div>
 
 				<div className="my-4">
-                    <h5 className="mt-5">Oled sa üliõpilane, õppejõud või muu?</h5>
-                    <div className='d-flex justify-content-center gap-4'>
-                        <label className="small text-bold">
-                            <CustomInput
-                                type="radio"
-                                value="student"
-                                {...register("role", { required: true })}
-                            />
-                            Üliõpilane
-                        </label>
-                        <label className="small text-bold">
-                            <CustomInput
-                                type="radio"
-                                value="teacher"
-                                {...register("role", { required: true })}
-                            /> Õppejõud
-                        </label>
+					<h5 className="mt-5">
+						Oled sa üliõpilane, õppejõud või muu?
+					</h5>
+					<div className="d-flex justify-content-center gap-4">
 						<label className="small text-bold">
-                            <CustomInput
-                                type="radio"
-                                value="user"
-                                {...register("role", { required: true })}
-                            /> Muu
-                        </label>
-                    </div>
-                </div>
+							<CustomInput
+								type="radio"
+								value="student"
+								{...register("role", { required: true })}
+							/>
+							Üliõpilane
+						</label>
+						<label className="small text-bold">
+							<CustomInput
+								type="radio"
+								value="teacher"
+								{...register("role", { required: true })}
+							/>{" "}
+							Õppejõud
+						</label>
+						<label className="small text-bold">
+							<CustomInput
+								type="radio"
+								value="user"
+								{...register("role", { required: true })}
+							/>{" "}
+							Muu
+						</label>
+					</div>
+				</div>
 
 				{roleValue === "student" || roleValue === "teacher" ? (
-                    <div>
-                        <label htmlFor="uni-id" className="field-label">Uni-ID</label>
-                        <input
-                            className="login-field"
-							aria-required="true"
-                            type="text"
-                            id="Input_UniId"
-                            placeholder="Uni-ID (nt. mamets)"
-                            {...register("uniId", { required: true })}
-                        />
-						{errors.uniId && (
-						<span
-							className="text-danger field-validation-valid"
-							data-valmsg-for="Input.UniId"
-							data-valmsg-replace="true"
-						>
-							Required!
-						</span>
-					)}
-                    </div>
-                ) : null}
-
-                {roleValue === "student" && (
-					<>
-                    <div>
-                        <label htmlFor="matriklinumber" className="field-label">Matriklinumber</label>
-                        <input
-                            className="login-field"
-							aria-required="true"
-                            type="text"
-                            id="Input_MatriculationNumber"
-                            placeholder="Matriklinumber (nt. 231234IADB)"
-                            {...register("matriculationNumber", { required: true })}
-                        />
-						{errors.matriculationNumber && (
-						<span
-							className="text-danger field-validation-valid"
-							data-valmsg-for="Input.MatriculationNumber"
-							data-valmsg-replace="true"
-						>
-							Required!
-						</span>
-)}
-                    </div>
 					<div>
-						<label htmlFor="oppekava" className="field-label">Õppekava</label>
-						<select
+						<label htmlFor="uni-id" className="field-label">
+							Uni-ID
+						</label>
+						<input
 							className="login-field"
-							id="Input_Program"
-							{...register("program", { required: true })}
-						>
-							<option value="">Vali õppekava</option>
-							{programOptions.map((option) => (
-								<option key={option} value={option}>
-									{option}
-								</option>
-							))}
-						</select>
-						{errors.program && (
-						<span
-							className="text-danger field-validation-valid"
-							data-valmsg-for="Input.Program"
-							data-valmsg-replace="true"
-						>
-							Required!
-						</span>)}
+							aria-required="true"
+							type="text"
+							id="Input_UniId"
+							placeholder="Uni-ID (nt. mamets)"
+							{...register("uniId", { required: true })}
+						/>
+						{errors.uniId && (
+							<span
+								className="text-danger field-validation-valid"
+								data-valmsg-for="Input.UniId"
+								data-valmsg-replace="true"
+							>
+								Kohustuslik!
+							</span>
+						)}
 					</div>
+				) : null}
+
+				{roleValue === "student" && (
+					<>
+						<div>
+							<label
+								htmlFor="matriklinumber"
+								className="field-label"
+							>
+								Matriklinumber
+							</label>
+							<input
+								className="login-field"
+								aria-required="true"
+								type="text"
+								id="Input_MatriculationNumber"
+								placeholder="Matriklinumber (nt. 231234IADB)"
+								{...register("matriculationNumber", {
+									required: true,
+								})}
+							/>
+							{errors.matriculationNumber && (
+								<span
+									className="text-danger field-validation-valid"
+									data-valmsg-for="Input.MatriculationNumber"
+									data-valmsg-replace="true"
+								>
+									Kohustuslik!
+								</span>
+							)}
+						</div>
+						<div>
+							<label htmlFor="oppekava" className="field-label">
+								Õppekava
+							</label>
+							<select
+								className="login-field"
+								id="Input_Program"
+								{...register("program", { required: true })}
+							>
+								<option value="">Vali õppekava</option>
+								{programOptions.map((option) => (
+									<option key={option} value={option}>
+										{option}
+									</option>
+								))}
+							</select>
+							{errors.program && (
+								<span
+									className="text-danger field-validation-valid"
+									data-valmsg-for="Input.Program"
+									data-valmsg-replace="true"
+								>
+									Kohustuslik!
+								</span>
+							)}
+						</div>
 					</>
-                )}
+				)}
 
 				<ButtonGroup
 					className="mt-4 centered-button"

@@ -14,6 +14,11 @@ import ApplicationCard from "@/components/project/ApplicationCard";
 import CommentsSection from "@/components/project/CommentsSection";
 import ProjectHeaderSection from "@/components/project/ProjectHeaderSection";
 import ProjectMetaCard from "@/components/project/ProjectMetaCard";
+import { IProjectStep } from "@/types/domain/IProjectStep";
+import { ProjectStepService } from "@/services/ProjectStepService";
+import ProjectStepsSection from "@/components/project/ProjectStepsSection";
+import { IStepStatus } from "@/types/domain/IStepStatus";
+import { StepStatusService } from "@/services/StepStatusService";
 
 export default function ProjectDetails({
 	params,
@@ -23,6 +28,8 @@ export default function ProjectDetails({
 	const projectId = use(params).id;
 	const [project, setProject] = useState<IProject | null>(null);
 	const [application, setApplication] = useState<IApplication | null>(null);
+	const [projectSteps, setProjectSteps] = useState<IProjectStep[]>([]);
+
 	const [comments, setComments] = useState<IComment[]>([]);
 	const [newComment, setNewComment] = useState("");
 
@@ -35,33 +42,47 @@ export default function ProjectDetails({
 		value: string;
 	} | null>(null);
 
+	const [stepStatuses, setStepStatuses] = useState<IStepStatus[]>([]);
+
 	const { accountInfo } = useContext(AccountContext);
 
 	const projectService = new ProjectService();
 	const applicationService = new ApplicationService();
 	const groupService = new GroupService();
+	const projectStepService = new ProjectStepService();
 	const commentService = new CommentService();
+	const stepStatusService = new StepStatusService();
 
 	useEffect(() => {
 		const fetchData = async () => {
 			setIsLoading(true);
 			try {
-				const [projectRes, applicationRes, groupsRes, commentsRes] =
-					await Promise.all([
-						projectService.getByIdAsync(projectId),
-						applicationService.getCurrentUsersApplicationByProjectIdAsync(
-							projectId,
-						),
-						groupService.getAllMatchingProjectTeamSizeAsync(
-							projectId,
-						),
-						commentService.getAllByProjectIdAsync(projectId),
-					]);
+				const [
+					projectRes,
+					applicationRes,
+					groupsRes,
+					commentsRes,
+					projectStepsRes,
+					stepStatusesRes,
+				] = await Promise.all([
+					projectService.getByIdAsync(projectId),
+					applicationService.getCurrentUsersApplicationByProjectIdAsync(
+						projectId,
+					),
+					groupService.getAllMatchingProjectTeamSizeAsync(projectId),
+					commentService.getAllByProjectIdAsync(projectId),
+					projectStepService.getAllByProjectIdAsync(projectId),
+					stepStatusService.getAllAsync(),
+				]);
 
 				if (projectRes?.data) setProject(projectRes.data);
 				if (applicationRes?.data) setApplication(applicationRes.data);
 				if (groupsRes?.data) setGroups(groupsRes.data);
 				if (commentsRes?.data) setComments(commentsRes.data);
+				if (projectStepsRes?.data)
+					setProjectSteps(projectStepsRes.data);
+				if (stepStatusesRes?.data)
+					setStepStatuses(stepStatusesRes.data);
 			} catch (error) {
 				console.error("Error fetching project data: ", error);
 			} finally {
@@ -94,6 +115,22 @@ export default function ProjectDetails({
 				});
 		} catch (err) {
 			console.log("Something went wrong when applying for the project");
+		}
+	};
+
+	const updateStepStatus = async (projectStepStatusId: string, newStatusId: string) => {
+		try {
+			const res = await projectStepService.updateStepStatusAsync(projectStepStatusId, newStatusId);
+			if (res?.statusCode && res.statusCode <= 300) {
+				console.log("Step status updated successfully");
+				// Refresh project steps
+				const stepsRes = await projectStepService.getAllByProjectIdAsync(projectId);
+				if (stepsRes?.data) setProjectSteps(stepsRes.data);
+			} else {
+				console.error("Failed to update step status");
+			}
+		} catch (error) {
+			console.error("Error updating step status: ", error);
 		}
 	};
 
@@ -156,8 +193,13 @@ export default function ProjectDetails({
 								<ProjectMetaCard project={project} />
 							</div>
 						</div>
-
 						{/* TODO: check that user is project member */}
+						<ProjectStepsSection
+							projectSteps={projectSteps}
+							stepStatuses={stepStatuses}
+							onStatusChange={(projectStepStatusId: string, newStatusId: string) => updateStepStatus(projectStepStatusId, newStatusId)}
+						/>
+
 						{/* TODO: add option to reply to comments and show comment threads */}
 						<CommentsSection
 							comments={comments}

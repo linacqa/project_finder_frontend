@@ -4,6 +4,10 @@ import { useEffect, useState } from "react";
 import {
 	TTNewContainer,
 	Heading,
+	TTNewAlert,
+	ALERT_POSITION_TYPES,
+	ALERT_STATUS_TYPE,
+	ALERT_SIZE,
 } from "taltech-styleguide";
 import { IInvitation } from "@/types/domain/IInvitation";
 import { InvitationService } from "@/services/InvitationService";
@@ -11,54 +15,91 @@ import InvitationCard from "@/components/invitations/InvitationCard";
 
 export default function MyInvitationsPage() {
 	const [invitations, setInvitations] = useState<IInvitation[]>([]);
-	const [loading, setLoading] = useState(false);
+
+	const [message, setMessage] = useState<{
+		type: string;
+		text: string;
+	} | null>(null);
 
 	const invitationService = new InvitationService();
 
 	const handleAccept = async (id: string) => {
-		const invitationService = new InvitationService();
+		setMessage({ type: "loading", text: "Aktsepteerin kutset..." });
 		const res = await invitationService.acceptByIdAsync(id);
-		console.log(res);
 
 		if (res && res.statusCode && res.statusCode <= 300) {
-			// TODO
-			console.log("Invitation accepted successfully", res.data);
+			setInvitations((prev) => prev.filter((invite) => invite.id !== id));
+			setMessage({ type: "success", text: "Kutse aktsepteeritud." });
+			return;
 		}
+
+		setMessage({
+			type: "error",
+			text: `${res.statusCode ?? "Error"} - ${res.errors}`,
+		});
 	};
 
 	const handleDecline = async (id: string) => {
-		const invitationService = new InvitationService();
+		setMessage({ type: "loading", text: "Keeldun kutsest..." });
 		const res = await invitationService.declineByIdAsync(id);
 
 		if (res && res.statusCode && res.statusCode <= 300) {
-			// TODO
-			console.log("Invitation declined successfully", res.data);
+			setInvitations((prev) => prev.filter((invite) => invite.id !== id));
+			setMessage({ type: "success", text: "Kutsest keelduti." });
+			return;
 		}
+
+		setMessage({
+			type: "error",
+			text: `${res.statusCode ?? "Error"} - ${res.errors}`,
+		});
 	};
 
 	useEffect(() => {
-		setLoading(true);
+		setMessage({ type: "loading", text: "Laadin kutseid..." });
 
 		invitationService
 			.getAllAsync()
 			.then((res) => {
-				if (res && res.data) {
+				if (res.data) {
 					setInvitations(res.data);
-					console.log("Fetched invitations:", res.data);
+					setMessage(null);
+					return;
 				}
-			})
-			.finally(() => setLoading(false));
+
+				setMessage({
+					type: "error",
+					text: `${res.statusCode ?? "Error"} - ${res.errors}`,
+				});
+			});
 	}, []);
 
 	return (
 		<TTNewContainer>
+			{message && (
+				<div>
+					<TTNewAlert
+						position={ALERT_POSITION_TYPES.INLINE}
+						variant={
+							message.type === "error"
+								? ALERT_STATUS_TYPE.ERROR
+								: message.type === "success"
+									? ALERT_STATUS_TYPE.SUCCESS
+									: ALERT_STATUS_TYPE.INFO
+						}
+						dismissible
+						size={ALERT_SIZE.SMALL}
+						title={message.text}
+						onClose={() => setMessage(null)}
+					></TTNewAlert>
+				</div>
+			)}
 			<Heading as="h1" visual="h2">
 				Minu kutsed
 			</Heading>
 			<p>Siin näed kõiki kutseid, mis sulle on saadetud.</p>
 
-			{loading && <div>Laadin...</div>}
-			{!loading && invitations.length === 0 && <p>Ühtegi kutset pole.</p>}
+			{invitations.length === 0 && <p>Ühtegi kutset pole.</p>}
 
 			{invitations.map((invite) => (
 				<InvitationCard

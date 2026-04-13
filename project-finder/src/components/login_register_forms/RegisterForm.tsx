@@ -58,7 +58,6 @@ export default function RegisterForm() {
 	const roleValue = watch("role");
 
 	const onSubmit: SubmitHandler<Inputs> = async (data: Inputs) => {
-		console.log(data);
 		setMessage({ type: "loading", text: "Laadin..." });
 
 		if (data.password !== data.confirmPassword) {
@@ -78,6 +77,7 @@ export default function RegisterForm() {
 				data.program,
 				data.phoneNumber,
 			);
+			console.log(result);
 			if (result.errors) {
 				setMessage({ type: "error", text: result.statusCode + " - " + result.errors[0] });
 				return;

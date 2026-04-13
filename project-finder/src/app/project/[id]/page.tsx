@@ -9,7 +9,14 @@ import { IComment } from "@/types/domain/IComment";
 import { IGroup } from "@/types/domain/IGroup";
 import { IProject } from "@/types/domain/IProject";
 import { use, useContext, useEffect, useState } from "react";
-import { Heading, TTNewContainer } from "taltech-styleguide";
+import {
+	ALERT_POSITION_TYPES,
+	ALERT_SIZE,
+	ALERT_STATUS_TYPE,
+	Heading,
+	TTNewAlert,
+	TTNewContainer,
+} from "taltech-styleguide";
 import ApplicationCard from "@/components/project/ApplicationCard";
 import CommentsSection from "@/components/project/CommentsSection";
 import ProjectHeaderSection from "@/components/project/ProjectHeaderSection";
@@ -33,7 +40,10 @@ export default function ProjectDetails({
 	const [comments, setComments] = useState<IComment[]>([]);
 	const [newComment, setNewComment] = useState("");
 
-	const [isLoading, setIsLoading] = useState(true);
+	const [message, setMessage] = useState<{
+		type: string;
+		text: string;
+	} | null>(null);
 
 	const [isGroupApplication, setIsGroupApplication] = useState(false);
 	const [groups, setGroups] = useState<IGroup[]>([]);
@@ -55,7 +65,7 @@ export default function ProjectDetails({
 
 	useEffect(() => {
 		const fetchData = async () => {
-			setIsLoading(true);
+			setMessage({ type: "loading", text: "Laadin projekti andmeid..." });
 			try {
 				const [
 					projectRes,
@@ -83,23 +93,69 @@ export default function ProjectDetails({
 					setProjectSteps(projectStepsRes.data);
 				if (stepStatusesRes?.data)
 					setStepStatuses(stepStatusesRes.data);
+
+				if (
+					projectRes?.data &&
+					commentsRes?.data &&
+					projectStepsRes?.data &&
+					stepStatusesRes?.data
+				) {
+					setMessage(null);
+				} else {
+					const errors: string[] = [];
+					if (!projectRes?.data)
+						errors.push(
+							`Projekti laadimine: ${projectRes?.errors}`,
+						);
+					if (!commentsRes?.data && !(commentsRes.statusCode == 401))
+						errors.push(
+							`Kommentaaride laadimine: ${commentsRes?.errors}`,
+						);
+					if (
+						!projectStepsRes?.data &&
+						!(projectStepsRes.statusCode == 401)
+					)
+						errors.push(
+							`Etappide laadimine: ${projectStepsRes?.errors}`,
+						);
+					if (
+						!stepStatusesRes?.data &&
+						!(stepStatusesRes.statusCode == 401)
+					)
+						errors.push(
+							`Staatuste laadimine: ${stepStatusesRes?.errors}`,
+						);
+
+					if (errors.length === 0) {
+						setMessage(null);
+						return;
+					}
+
+					setMessage({
+						type: "error",
+						text: errors.join(" | "),
+					});
+				}
 			} catch (error) {
 				console.error("Error fetching project data: ", error);
-			} finally {
-				setIsLoading(false);
+				setMessage({
+					type: "error",
+					text: "Projekti andmete laadimine ebaõnnestus.",
+				});
 			}
 		};
-
 		fetchData();
 	}, [projectId]);
 
 	const addApplication = () => {
 		if (isGroupApplication && !selectedGroupId) {
-			alert("Palun valige grupp, millega kandideerite");
+			setMessage({
+				type: "error",
+				text: "Palun valige grupp, millega kandideerite.",
+			});
 			return;
 		}
-		console.log(selectedGroupId);
-		const applicationService = new ApplicationService();
+		setMessage({ type: "loading", text: "Saadan kandidatuuri..." });
 		try {
 			applicationService
 				.addAsync({
@@ -109,28 +165,66 @@ export default function ProjectDetails({
 						: null,
 				})
 				.then((res) => {
-					if (res && res.data) {
-						console.log("Application added successfully");
+					if (
+						res &&
+						res.statusCode &&
+						res.statusCode <= 300 &&
+						res.data
+					) {
+						setMessage({
+							type: "success",
+							text: "Kandidatuur saadetud.",
+						});
+						return;
 					}
+
+					setMessage({
+						type: "error",
+						text: `${res.statusCode ?? "Error"} - ${res.errors}`,
+					});
 				});
 		} catch (err) {
-			console.log("Something went wrong when applying for the project");
+			setMessage({
+				type: "error",
+				text: "Kandidatuuri saatmine ebaõnnestus.",
+			});
 		}
 	};
 
-	const updateStepStatus = async (projectStepStatusId: string, newStatusId: string) => {
+	const updateStepStatus = async (
+		projectStepStatusId: string,
+		newStatusId: string,
+	) => {
+		setMessage({ type: "loading", text: "Uuendan etapi staatust..." });
 		try {
-			const res = await projectStepService.updateStepStatusAsync(projectStepStatusId, newStatusId);
+			const res = await projectStepService.updateStepStatusAsync(
+				projectStepStatusId,
+				newStatusId,
+			);
 			if (res?.statusCode && res.statusCode <= 300) {
-				console.log("Step status updated successfully");
 				// Refresh project steps
-				const stepsRes = await projectStepService.getAllByProjectIdAsync(projectId);
-				if (stepsRes?.data) setProjectSteps(stepsRes.data);
-			} else {
-				console.error("Failed to update step status");
+				const stepsRes =
+					await projectStepService.getAllByProjectIdAsync(projectId);
+				if (stepsRes?.data) {
+					setProjectSteps(stepsRes.data);
+					setMessage({
+						type: "success",
+						text: "Etapi staatus uuendatud.",
+					});
+					return;
+				}
 			}
+
+			setMessage({
+				type: "error",
+				text: `${res?.statusCode ?? "Error"} - ${res?.errors}`,
+			});
 		} catch (error) {
 			console.error("Error updating step status: ", error);
+			setMessage({
+				type: "error",
+				text: "Etapi staatuse uuendamine ebaõnnestus.",
+			});
 		}
 	};
 
@@ -141,75 +235,112 @@ export default function ProjectDetails({
 
 	const postComment = async () => {
 		if (newComment.trim() === "") {
-			alert("Kommentaar ei saa olla tühi");
+			setMessage({
+				type: "error",
+				text: "Kommentaar ei saa olla tühi.",
+			});
 			return;
 		}
 
+		setMessage({ type: "loading", text: "Postitan kommentaari..." });
 		const res = await commentService.addAsync({
 			projectId: projectId,
 			content: newComment,
 			replyToCommentId: null,
 		});
-		if (res && res.data) {
-			console.log("Comment added successfully");
+		if (res && res.statusCode && res.statusCode <= 300 && res.data) {
 			await loadComments();
 			setNewComment("");
+			setMessage({ type: "success", text: "Kommentaar postitatud." });
+			return;
 		}
+
+		setMessage({
+			type: "error",
+			text: `${res.statusCode ?? "Error"} - ${res.errors}`,
+		});
 	};
 
 	return (
 		<>
-			{isLoading ? (
-				<p>Laadin...</p>
-			) : (
-				<>
-					{project && <ProjectHeaderSection project={project} />}
-
-					<TTNewContainer>
-						<div className="row">
-							<div className="col-md-8">
-								<Heading as="h2" visual="h4" className="mb-2">
-									Kirjeldus
-								</Heading>
-								<p style={{ whiteSpace: "pre-wrap" }}>
-									{project?.description}
-								</p>
-							</div>
-
-							<div className="col-md-4">
-								<ApplicationCard
-									isStudent={accountInfo?.role === "student"}
-									application={application}
-									project={project}
-									isGroupApplication={isGroupApplication}
-									setIsGroupApplication={
-										setIsGroupApplication
-									}
-									groups={groups}
-									selectedGroupId={selectedGroupId}
-									setSelectedGroupId={setSelectedGroupId}
-									onApply={addApplication}
-								/>
-								<ProjectMetaCard project={project} />
-							</div>
-						</div>
-						{/* TODO: check that user is project member */}
-						<ProjectStepsSection
-							projectSteps={projectSteps}
-							stepStatuses={stepStatuses}
-							onStatusChange={(projectStepStatusId: string, newStatusId: string) => updateStepStatus(projectStepStatusId, newStatusId)}
-						/>
-
-						{/* TODO: add option to reply to comments and show comment threads */}
-						<CommentsSection
-							comments={comments}
-							newComment={newComment}
-							setNewComment={setNewComment}
-							onPostComment={postComment}
-						/>
-					</TTNewContainer>
-				</>
+			{message && (
+				<div>
+					<TTNewAlert
+						position={ALERT_POSITION_TYPES.INLINE}
+						variant={
+							message.type === "error"
+								? ALERT_STATUS_TYPE.ERROR
+								: message.type === "success"
+									? ALERT_STATUS_TYPE.SUCCESS
+									: ALERT_STATUS_TYPE.INFO
+						}
+						dismissible
+						size={ALERT_SIZE.SMALL}
+						title={message.text}
+						onClose={() => setMessage(null)}
+					></TTNewAlert>
+				</div>
 			)}
+			{project && <ProjectHeaderSection project={project} />}
+
+			<TTNewContainer>
+				<div className="row">
+					<div className="col-md-8">
+						<Heading as="h2" visual="h4" className="mb-2">
+							Kirjeldus
+						</Heading>
+						<p style={{ whiteSpace: "pre-wrap" }}>
+							{project?.description}
+						</p>
+					</div>
+
+					<div className="col-md-4">
+						<ApplicationCard
+							isStudent={accountInfo?.role === "student"}
+							application={application}
+							project={project}
+							isGroupApplication={isGroupApplication}
+							setIsGroupApplication={setIsGroupApplication}
+							groups={groups}
+							selectedGroupId={selectedGroupId}
+							setSelectedGroupId={setSelectedGroupId}
+							onApply={addApplication}
+						/>
+						<ProjectMetaCard project={project} />
+					</div>
+				</div>
+
+				{project?.users &&
+					accountInfo &&
+					(accountInfo.role === "admin" ||
+					project.users.some(
+						(u) => u.user.id === accountInfo.userId,
+					)) && (
+						<>
+							<ProjectStepsSection
+								projectSteps={projectSteps}
+								stepStatuses={stepStatuses}
+								onStatusChange={(
+									projectStepStatusId: string,
+									newStatusId: string,
+								) =>
+									updateStepStatus(
+										projectStepStatusId,
+										newStatusId,
+									)
+								}
+							/>
+
+							{/* TODO: add option to reply to comments and show comment threads */}
+							<CommentsSection
+								comments={comments}
+								newComment={newComment}
+								setNewComment={setNewComment}
+								onPostComment={postComment}
+							/>
+						</>
+					)}
+			</TTNewContainer>
 		</>
 	);
 }

@@ -43,7 +43,6 @@ export default function LoginForm() {
 	});
 
 	const onSubmit: SubmitHandler<Inputs> = async (data: Inputs) => {
-		console.log(data);
 		setMessage({ type: "loading", text: "Laadin..." });
 
 		try {
@@ -55,7 +54,7 @@ export default function LoginForm() {
 			if (result.errors) {
 				setMessage({
 					type: "error",
-					text: result.statusCode + " - " + result.errors[0],
+					text: `${result.statusCode ?? "Error"} - ${result.errors[0]}`,
 				});
 				return;
 			}

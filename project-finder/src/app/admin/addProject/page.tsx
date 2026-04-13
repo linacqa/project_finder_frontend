@@ -1,22 +1,24 @@
 "use client";
-import ConfirmationModal from "@/components/modal/ConfirmationModal";
 import TagList from "@/components/tags/TagList";
 import { ProjectStatusService } from "@/services/ProjectStatusService";
 import { ProjectTypeService } from "@/services/ProjectTypeService";
 import { UserService } from "@/services/UserService";
 import { TagService } from "@/services/TagService";
-import { FolderService } from "@/services/FolderService";
 import { StepService } from "@/services/StepService";
 import { ProjectService } from "@/services/ProjectService";
 import { IProjectAdd } from "@/types/domain/IProjectAdd";
 import { useEffect, useState } from "react";
 import {
+	ALERT_POSITION_TYPES,
+	ALERT_SIZE,
+	ALERT_STATUS_TYPE,
 	ButtonGroup,
 	CustomInput,
 	DateTimePicker,
 	Dropdown,
 	Heading,
 	Input,
+	TTNewAlert,
 	TTNewButton,
 	TTNewCard,
 	TTNewCardContent,
@@ -48,7 +50,6 @@ export default function AddProject() {
 	const [tagOptions, setTagOptions] = useState<
 		{ label: string; id: string }[]
 	>([]);
-	const [loadingTags, setLoadingTags] = useState(false);
 
 	const [projectTypeOptions, setProjectTypeOptions] = useState<
 		{
@@ -56,7 +57,6 @@ export default function AddProject() {
 			id: string;
 		}[]
 	>([]);
-	const [loadingProjectTypes, setLoadingProjectTypes] = useState(false);
 
 	const [projectStatusOptions, setProjectStatusOptions] = useState<
 		{
@@ -64,29 +64,25 @@ export default function AddProject() {
 			id: string;
 		}[]
 	>([]);
-	const [loadingProjectStatuses, setLoadingProjectStatuses] = useState(false);
 
 	const [authorOptions, setAuthorOptions] = useState<
 		{ label: string; id: string }[]
 	>([]);
-	const [loadingAuthors, setLoadingAuthors] = useState(false);
 
 	const [supervisorOptions, setSupervisorOptions] = useState<
 		{ label: string; id: string }[]
 	>([]);
-	const [loadingSupervisors, setLoadingSupervisors] = useState(false);
 
 	const [supervisorIsRegistered, setSupervisorIsRegistered] = useState(true);
 	const [externalSupervisorIsRegistered, setExternalSupervisorIsRegistered] =
 		useState(true);
 
 	const [steps, setSteps] = useState<{ label: string; id: string }[]>([]);
-	const [loadingSteps, setLoadingSteps] = useState(false);
 
-	// const [folders, setFolders] = useState<{ label: string; id: string }[]>([]);
-	// const [loadingFolders, setLoadingFolders] = useState(false);
-
-	const [showDeleteModal, setShowDeleteModal] = useState(false);
+	const [message, setMessage] = useState<{
+		type: string;
+		text: string;
+	} | null>(null);
 
 	const router = useRouter();
 
@@ -94,146 +90,93 @@ export default function AddProject() {
 	const projectStatusService = new ProjectStatusService();
 	const tagService = new TagService();
 	const userService = new UserService();
-	// const folderService = new FolderService();
 	const stepService = new StepService();
 
 	useEffect(() => {
 		let mounted = true;
-		setLoadingProjectTypes(true);
-		projectTypeService
-			.getAllAsync()
-			.then((res) => {
+		const loadInitialData = async () => {
+			setMessage({ type: "loading", text: "Laadin..." });
+
+			try {
+				const [
+					projectTypesRes,
+					projectStatusesRes,
+					tagsRes,
+					authorsRes,
+					supervisorsRes,
+					stepsRes,
+				] = await Promise.all([
+					projectTypeService.getAllAsync(),
+					projectStatusService.getAllAsync(),
+					tagService.getAllAsync(),
+					userService.getAllAsync(),
+					userService.getAllSupervisorsAsync(),
+					stepService.getAllAsync(),
+				]);
+
 				if (!mounted) return;
-				if (res && res.data) {
+
+				if (projectTypesRes.data) {
 					setProjectTypeOptions(
-						res.data.map((pt) => ({ label: pt.name, id: pt.id })),
+						projectTypesRes.data.map((pt) => ({
+							label: pt.name,
+							id: pt.id,
+						})),
 					);
 				}
-			})
-			.catch((err) => console.error(err))
-			.finally(() => {
-				if (mounted) setLoadingProjectTypes(false);
-			});
 
-		setLoadingProjectStatuses(true);
-		projectStatusService
-			.getAllAsync()
-			.then((res) => {
-				if (!mounted) return;
-				if (res && res.data) {
+				if (projectStatusesRes.data) {
 					setProjectStatusOptions(
-						res.data.map((ps) => ({ label: ps.name, id: ps.id })),
+						projectStatusesRes.data.map((ps) => ({
+							label: ps.name,
+							id: ps.id,
+						})),
 					);
 				}
-			})
-			.catch((err) => console.error(err))
-			.finally(() => {
-				if (mounted) setLoadingProjectStatuses(false);
-			});
 
-		setLoadingTags(true);
-		tagService
-			.getAllAsync()
-			.then((res) => {
-				if (!mounted) return;
-				if (res && res.data) {
+				if (tagsRes.data) {
 					setTagOptions(
-						res.data.map((t) => ({ label: t.name, id: t.id })),
+						tagsRes.data.map((t) => ({ label: t.name, id: t.id })),
 					);
 				}
-			})
-			.catch((err) => console.error(err))
-			.finally(() => {
-				if (mounted) setLoadingTags(false);
-			});
 
-		setLoadingAuthors(true);
-		userService
-			.getAllAsync()
-			.then((res) => {
-				if (!mounted) return;
-				if (res && res.data) {
+				if (authorsRes.data) {
 					setAuthorOptions(
-						res.data.map((u) => ({
-							label:
-								u.firstName +
-								" " +
-								u.lastName +
-								" (" +
-								u.email +
-								")",
+						authorsRes.data.map((u) => ({
+							label: `${u.firstName} ${u.lastName} (${u.email})`,
 							id: u.id,
 						})),
 					);
 				}
-			})
-			.catch((err) => console.error(err))
-			.finally(() => {
-				if (mounted) setLoadingAuthors(false);
-			});
 
-		setLoadingSupervisors(true);
-		userService
-			.getAllSupervisorsAsync()
-			.then((res) => {
-				if (!mounted) return;
-				if (res && res.data) {
+				if (supervisorsRes.data) {
 					setSupervisorOptions(
-						res.data.map((s) => ({
-							label:
-								s.firstName +
-								" " +
-								s.lastName +
-								" (" +
-								s.email +
-								")",
+						supervisorsRes.data.map((s) => ({
+							label: `${s.firstName} ${s.lastName} (${s.email})`,
 							id: s.id,
 						})),
 					);
 				}
-			})
-			.catch((err) => console.error(err))
-			.finally(() => {
-				if (mounted) setLoadingSupervisors(false);
-			});
 
-		// setLoadingFolders(true);
-		// folderService
-		// 	.getAllAsync()
-		// 	.then((res) => {
-		// 		if (!mounted) return;
-		// 		if (res && res.data) {
-		// 			setFolders(
-		// 				res.data.map((f) => ({
-		// 					label: f.name,
-		// 					id: f.id,
-		// 				})),
-		// 			);
-		// 		}
-		// 	})
-		// 	.catch((err) => console.error(err))
-		// 	.finally(() => {
-		// 		if (mounted) setLoadingFolders(false);
-		// 	});
-
-		setLoadingSteps(true);
-		stepService
-			.getAllAsync()
-			.then((res) => {
-				if (!mounted) return;
-				if (res && res.data) {
+				if (stepsRes.data) {
 					setSteps(
-						res.data.map((s) => ({
-							label: s.name,
-							id: s.id,
-						})),
+						stepsRes.data.map((s) => ({ label: s.name, id: s.id })),
 					);
 				}
-			})
-			.catch((err) => console.error(err))
-			.finally(() => {
-				if (mounted) setLoadingSteps(false);
-			});
+
+				setMessage(null);
+			} catch (error) {
+				if (!mounted) return;
+
+				setMessage({
+					type: "error",
+					text: "Andmete laadimine ebaonnestus.",
+				});
+				console.error(error);
+			}
+		};
+
+		void loadInitialData();
 
 		return () => {
 			mounted = false;
@@ -248,11 +191,56 @@ export default function AddProject() {
 	};
 
 	const handleSave = () => {
+		if (!project.titleInEstonian.trim()) {
+			setMessage({
+				type: "error",
+				text: "Pealkirjad ei tohi olla tühjad.",
+			});
+			return;
+		} else if (!project.authorId) {
+			setMessage({ type: "error", text: "Autor peab olema valitud." });
+			return;
+		} else if (!project.projectTypeId) {
+			setMessage({
+				type: "error",
+				text: "Projekti tüüp peab olema valitud.",
+			});
+			return;
+		} else if (!project.description.trim()) {
+			setMessage({ type: "error", text: "Kirjeldus ei tohi olla tühi." });
+			return;
+		} else if (
+			project.minStudents < 1 ||
+			project.maxStudents < 1 ||
+			project.minStudents > project.maxStudents
+		) {
+			setMessage({
+				type: "error",
+				text: "Õpilaste arv peab olema positiivne ja minimaalne arv ei tohi olla suurem kui maksimaalne arv.",
+			});
+			return;
+		} else if (!project.projectStatusId) {
+			setMessage({
+				type: "error",
+				text: "Projekti staatus peab olema valitud.",
+			});
+			return;
+		}
+
 		const projectService = new ProjectService();
 		projectService.addAsync(project).then((res) => {
 			if (res && res.data) {
 				router.push("/admin/allProjects");
 				console.log("Project created with id: ", res.data.id);
+				setMessage({
+					type: "success",
+					text: "Projekt edukalt loodud!",
+				});
+			} else {
+				setMessage({
+					type: "error",
+					text: "Projekti loomine ebaõnnestus.",
+				});
 			}
 		});
 	};
@@ -260,6 +248,24 @@ export default function AddProject() {
 	return (
 		<>
 			<TTNewContainer>
+				{message && (
+					<div>
+						<TTNewAlert
+							position={ALERT_POSITION_TYPES.INLINE}
+							variant={
+								message.type === "error"
+									? ALERT_STATUS_TYPE.ERROR
+									: message.type === "success"
+										? ALERT_STATUS_TYPE.SUCCESS
+										: ALERT_STATUS_TYPE.INFO
+							}
+							dismissible
+							size={ALERT_SIZE.SMALL}
+							title={message.text}
+							onClose={() => setMessage(null)}
+						></TTNewAlert>
+					</div>
+				)}
 				<TTNewCard className="mb-4 w-auto">
 					<TTNewCardContent className="grid-container">
 						<div className="d-flex flex-column gap-3">
@@ -415,9 +421,6 @@ export default function AddProject() {
 												<Dropdown.Item
 													key={index}
 													className="text-primary px-3 py-2"
-													// onClick={() =>
-													// 	handleAddTag(tag)
-													// }
 													onClick={() => {
 														if (
 															!project.tagIds.includes(
@@ -502,41 +505,6 @@ export default function AddProject() {
 										})
 									}
 								/>
-
-								{/* <Heading
-									className="admin-thesis-details-titles"
-									as="h4"
-									visual="h4"
-								>
-									Tiimi rollid
-								</Heading>
-
-								<Dropdown className="my-3">
-									<Dropdown.Toggle
-										variant="outline"
-										className="border border-primary text-primary fw-semibold px-4 py-2"
-									>
-										Vali rollid
-									</Dropdown.Toggle>
-
-									<Dropdown.Menu>
-										{Object.values(EITRole).map((role) => (
-											<Dropdown.Item
-												key={role}
-												onClick={() =>
-													handleAddRole(role)
-												}
-											>
-												{role}
-											</Dropdown.Item>
-										))}
-									</Dropdown.Menu>
-								</Dropdown> */}
-
-								{/* <TagList
-									tags={thesis.roles!}
-									handleRemoveTag={handleRemoveRole}
-								/> */}
 							</div>
 
 							<div>
@@ -619,7 +587,8 @@ export default function AddProject() {
 													handleRemoveTag={() =>
 														setProject({
 															...project,
-															primarySupervisorId: null,
+															primarySupervisorId:
+																null,
 														})
 													}
 												/>
@@ -627,7 +596,10 @@ export default function AddProject() {
 										) : (
 											<Input
 												className="mb-2"
-												value={project.primarySupervisor || ""}
+												value={
+													project.primarySupervisor ||
+													""
+												}
 												onChange={(e) =>
 													handleStringFieldChange(
 														"primarySupervisor",
@@ -662,53 +634,60 @@ export default function AddProject() {
 
 										{externalSupervisorIsRegistered ? (
 											<>
-											<Dropdown className="my-3">
-												<Dropdown.Toggle
-													variant="outline"
-													className="border border-primary text-primary fw-semibold px-4 py-2"
-												>
-													Vali kaasjuhendaja
-												</Dropdown.Toggle>
+												<Dropdown className="my-3">
+													<Dropdown.Toggle
+														variant="outline"
+														className="border border-primary text-primary fw-semibold px-4 py-2"
+													>
+														Vali kaasjuhendaja
+													</Dropdown.Toggle>
 
-												<Dropdown.Menu className="shadow-sm border-0">
-													{supervisorOptions.map(
-														(externalSupervisor, index) => (
-															<Dropdown.Item
-																key={index}
-																onClick={() => {
-																	setProject({
-																		...project,
-																		externalSupervisorId:
-																			externalSupervisor.id,
-																	});
-																}}
-															>
-																{
-																	externalSupervisor.label
-																}
-															</Dropdown.Item>
-														),
-													)}
-												</Dropdown.Menu>
-											</Dropdown>
-											<TagList
-												tags={
-													supervisorOptions
-														.filter(
-															(s) =>
-																project.externalSupervisorId ===
-																s.id,
-														)
-														.map((s) => s.label) ||
-													[]
-												}
-												handleRemoveTag={() =>
-													setProject({
-														...project,
-														externalSupervisorId: null,
-													})
-												}
-											/>
+													<Dropdown.Menu className="shadow-sm border-0">
+														{supervisorOptions.map(
+															(
+																externalSupervisor,
+																index,
+															) => (
+																<Dropdown.Item
+																	key={index}
+																	onClick={() => {
+																		setProject(
+																			{
+																				...project,
+																				externalSupervisorId:
+																					externalSupervisor.id,
+																			},
+																		);
+																	}}
+																>
+																	{
+																		externalSupervisor.label
+																	}
+																</Dropdown.Item>
+															),
+														)}
+													</Dropdown.Menu>
+												</Dropdown>
+												<TagList
+													tags={
+														supervisorOptions
+															.filter(
+																(s) =>
+																	project.externalSupervisorId ===
+																	s.id,
+															)
+															.map(
+																(s) => s.label,
+															) || []
+													}
+													handleRemoveTag={() =>
+														setProject({
+															...project,
+															externalSupervisorId:
+																null,
+														})
+													}
+												/>
 											</>
 										) : (
 											<Input
@@ -905,77 +884,10 @@ export default function AddProject() {
 								/>
 							</div>
 
-							{/* <div>
-								<Heading
-									className="admin-thesis-details-titles"
-									as="h4"
-									visual="h4"
-								>
-									Kaustad
-								</Heading>
-								<Dropdown className="my-3">
-									<Dropdown.Toggle
-										variant="outline"
-										className="border border-primary text-primary fw-semibold px-4 py-2"
-									>
-										Vali kaustad
-									</Dropdown.Toggle>
-
-									<Dropdown.Menu className="shadow-sm border-0">
-										{folders.map((folder, index) => (
-											<Dropdown.Item
-												key={index}
-												className="text-primary px-3 py-2"
-												onClick={() => {
-													if (
-														!project.folderIds.includes(
-															folder.id,
-														)
-													) {
-														setProject({
-															...project,
-															folderIds: [
-																...project.folderIds,
-																folder.id,
-															],
-														});
-													}
-												}}
-											>
-												{folder.label}
-											</Dropdown.Item>
-										))}
-									</Dropdown.Menu>
-								</Dropdown>
-								<TagList
-									tags={
-										folders
-											.filter((f) =>
-												project.folderIds.includes(f.id),
-											)
-											.map((f) => f.label) || []
-									}
-									handleRemoveTag={(index) => {
-										const folderIdToRemove =
-											project.folderIds[index];
-										setProject({
-											...project,
-											folderIds: project.folderIds.filter(
-												(id) => id !== folderIdToRemove,
-											),
-										});
-									}}
-								/>
-							</div> */}
-
 							<div>
 								<form
 									onSubmit={(e) => {
 										e.preventDefault();
-										console.log(
-											"Project to save:",
-											project,
-										);
 										handleSave();
 									}}
 								>

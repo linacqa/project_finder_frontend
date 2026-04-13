@@ -49,7 +49,8 @@ export abstract class BaseService {
 							localStorage.getItem("_refreshToken");
 						const response = await axios.post<ILoginDto>(
 							this.axiosInstance.defaults.baseURL +
-								"account/renewRefreshToken?jwtExpiresInSeconds=5",
+								// "account/renewRefreshToken?jwtExpiresInSeconds=5",
+								"account/renewRefreshToken",
 							{
 								jwt: jwt,
 								refreshToken: refreshToken,

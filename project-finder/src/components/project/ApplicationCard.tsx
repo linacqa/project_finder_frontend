@@ -43,7 +43,7 @@ export default function ApplicationCard({
 		<TTNewCard className="mb-3">
 			<TTNewCardContent>
 				<div className="d-flex flex-column gap-1">
-					{!application && (
+					{!application && project?.projectStatus.name === "Open" && (
 						<>
 							<CustomInput
 								className="mb-2"

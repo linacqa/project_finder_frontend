@@ -17,10 +17,12 @@ interface ProjectCardProps {
 	tags: ITag[];
 	status: string;
 	supervisorMissing: boolean;
+	supervisor: string | null;
 	teamSizeMin: number;
 	teamSizeMax: number;
 	deadline: string;
 	createdAt: string;
+	type: string;
 }
 
 export default function ProjectCard({
@@ -31,10 +33,12 @@ export default function ProjectCard({
 	tags,
 	status,
 	supervisorMissing,
+	supervisor,
 	teamSizeMin,
 	teamSizeMax,
 	deadline,
 	createdAt,
+	type,
 }: ProjectCardProps) {
 	return (
 		<TTNewCard className="mb-4 w-auto">
@@ -79,6 +83,8 @@ export default function ProjectCard({
 					</div>
 
 					<p className="pt-2 text-sm fw-semibold">Autor: {author}</p>
+					<p className="text-sm fw-semibold">Juhendaja: {supervisor || "Puudub"}</p>
+					<p className="text-sm fw-semibold">Tüüp: {type}</p>
 
 					<div className="d-flex gap-2 flex-wrap">
 						{/* <StatusTag

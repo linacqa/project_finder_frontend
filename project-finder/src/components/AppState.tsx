@@ -1,6 +1,7 @@
 "use client";
 
 import { AccountContext, IAccountInfo } from "@/context/AccountContext";
+import { AccountService } from "@/services/AccountService";
 import { useEffect, useState } from "react";
 import { ConfigProvider } from "taltech-styleguide";
 
@@ -8,6 +9,7 @@ export default function AppState({
 	children,
 }: Readonly<{ children: React.ReactNode }>) {
 	const [accountInfo, setAccountInfo] = useState<IAccountInfo | undefined>();
+
 	const updateAccountInfo = (value: IAccountInfo) => {
 		setAccountInfo(value);
 		localStorage.setItem("_jwt", value.jwt!);
@@ -19,27 +21,46 @@ export default function AppState({
 	};
 
 	useEffect(() => {
-		const firstName = localStorage.getItem("_firstName");
-		const lastName = localStorage.getItem("_lastName");
-		const role = localStorage.getItem("_role");
-		const jwt = localStorage.getItem("_jwt");
-		const refreshToken = localStorage.getItem("_refreshToken");
-		const userId = localStorage.getItem("_userId");
+		let isMounted = true;
 
-		// Temporary solution
-		// TODO: don't use localStorage for this, cause user can manually change data in localStorage
-		if (jwt && refreshToken && firstName && lastName && role) {
+		const hydrateAccountInfo = async () => {
+			const jwt = localStorage.getItem("_jwt");
+			const refreshToken = localStorage.getItem("_refreshToken");
+
+			if (!jwt || !refreshToken) {
+				if (isMounted) {
+					setAccountInfo({});
+				}
+				return;
+			}
+
+			const accountService = new AccountService();
+			const userInfo = await accountService.getCurrentUserInfoAsync();
+
+			if (!isMounted) {
+				return;
+			}
+
+			if (userInfo.errors || !userInfo.data) {
+				setAccountInfo({});
+				return;
+			}
+
 			setAccountInfo({
 				jwt,
 				refreshToken,
-				firstName: firstName || undefined,
-				lastName: lastName || undefined,
-				role: (role as IAccountInfo["role"]) || undefined,
-				userId: userId || undefined,
+				firstName: userInfo.data.firstName,
+				lastName: userInfo.data.lastName,
+				role: userInfo.data.role,
+				userId: userInfo.data.id,
 			});
-		} else {
-			setAccountInfo({});
-		}
+		};
+
+		hydrateAccountInfo();
+
+		return () => {
+			isMounted = false;
+		};
 	}, []);
 
 	return (

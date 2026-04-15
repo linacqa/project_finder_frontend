@@ -35,11 +35,11 @@ export default function Header() {
 						active: true,
 						children: "Projektide süsteem",
 						items: [
-							{ children: "Home", href: "/" },
+							// { children: "Home", href: "/" },
 							...(accountInfo?.jwt
 								? [
 										{
-											children: "Submit New Project Idea",
+											children: "Deklareeri uus projekti idee",
 											href: "/submitIdea",
 										},
 									]
@@ -50,8 +50,8 @@ export default function Header() {
 							// 	accountInfo.role === "teacher")
 								? [
 										{
-											children: "All Projects",
-											href: "/allProjects",
+											children: "Projektid",
+											href: "/",
 										},
 									]
 								: []),
@@ -59,7 +59,7 @@ export default function Header() {
 							(accountInfo.role === "student")
 								? [
 										{
-											children: "Groups",
+											children: "Grupid",
 											href: "/groups",
 										},
 									]
@@ -67,19 +67,19 @@ export default function Header() {
 							...(accountInfo?.jwt && accountInfo.role === "admin"
 								? [
 										{
-											children: "Add New Project",
+											children: "Lisa uus projekt",
 											href: "/admin/addProject",
 										},
 										{
-											children: "Applications",
+											children: "Kandideerimised",
 											href: "/admin/applications",
 										},
 										{
-											children: "Tags",
+											children: "Sildid",
 											href: "/admin/tags",
 										},
 										{
-											children: "Steps",
+											children: "Etapid",
 											href: "/admin/steps",
 										},
 									]
@@ -98,6 +98,7 @@ export default function Header() {
 						? {
 								links: [
 									{
+										// TODO
 										children: "Minu lõputöö(-d)",
 										href: "/my-thesis",
 									},

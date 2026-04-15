@@ -1,6 +1,7 @@
 import { BaseEntityService } from "./BaseEntityService";
 import { IProject } from "@/types/domain/IProject";
 import { IProjectAdd } from "@/types/domain/IProjectAdd";
+import { IProjectsSearchResult } from "@/types/IProjectsSearchResult";
 import { IResultObject } from "@/types/IResultObject";
 import { AxiosError } from "axios";
 
@@ -20,7 +21,7 @@ export class ProjectService extends BaseEntityService<IProject, IProjectAdd> {
 		super('projects');
 	}
 
-	async searchAsync(search: IProjectSearchParams = {}): Promise<IResultObject<IProject[]>> {
+	async searchAsync(search: IProjectSearchParams = {}): Promise<IResultObject<IProjectsSearchResult>> {
 		try {
 			const params = new URLSearchParams();
 
@@ -33,7 +34,7 @@ export class ProjectService extends BaseEntityService<IProject, IProjectAdd> {
 			if (search.page !== undefined) params.append("page", search.page.toString());
 			if (search.pageSize !== undefined) params.append("pageSize", search.pageSize.toString());
 
-			const response = await this.axiosInstance.get<IProject[]>(`${this.basePath}/search`, {
+			const response = await this.axiosInstance.get<IProjectsSearchResult>(`${this.basePath}/search`, {
 				params,
 			});
 

@@ -82,6 +82,10 @@ export default function Header() {
 											children: "Etapid",
 											href: "/admin/steps",
 										},
+										{
+											children: "Kasutajad",
+											href: "/admin/users",
+										},
 									]
 								: []),
 						],

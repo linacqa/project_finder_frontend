@@ -5,4 +5,5 @@ export interface IUserInfo extends IDomainId {
 	firstName: string;
 	lastName: string;
 	phoneNumber: string;
+	role: string;
 }

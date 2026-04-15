@@ -107,4 +107,48 @@ export class UserService extends BaseService {
 			};
 		}
 	}
+
+	async changeUsersRoleAsync(
+		userId: string,
+		newRole: string
+	): Promise<IResultObject<null>> {
+		const url = `users/${userId}`;
+		try {
+			const response = await this.axiosInstance.patch(
+				url,
+				null,
+				{
+					params: {
+						role: newRole,
+					},
+				}
+			);
+
+			console.log("changeUsersRole response", response);
+
+			if (response.status <= 300) {
+				return {
+					statusCode: response.status,
+					data: null,
+				};
+			}
+
+			return {
+				statusCode: response.status,
+				errors: [
+					(
+						response.status.toString() +
+						" " +
+						response.statusText
+					).trim(),
+				],
+			};
+		} catch (error) {
+			console.log("error: ", (error as AxiosError).message);
+			return {
+				statusCode: (error as AxiosError).status ?? 0,
+				errors: [(error as AxiosError).code ?? "???"],
+			};
+		}
+	}
 }

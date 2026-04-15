@@ -8,6 +8,7 @@ export interface IAccountInfo {
 	userId?: string;
 	firstName?: string;
 	lastName?: string;
+	email?: string;
 	role?: "admin" | "user" | "student" | "teacher";
 }
 

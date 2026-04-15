@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
 	ALERT_POSITION_TYPES,
 	ALERT_SIZE,
@@ -17,12 +17,15 @@ import {
 import { FormGroup, FormLabel } from "react-bootstrap";
 import { TagService } from "@/services/TagService";
 import { UserService } from "@/services/UserService";
+import { AccountContext } from "@/context/AccountContext";
 
 export default function SubmitIdea() {
 	const [tagOptions, setTagOptions] = useState<{ label: string }[]>([]);
 	const [supervisorOptions, setSupervisorOptions] = useState<
 		{ label: string }[]
 	>([]);
+
+	const { accountInfo } = useContext(AccountContext);
 
 	const [message, setMessage] = useState<{
 		type: string;
@@ -86,16 +89,148 @@ export default function SubmitIdea() {
 					if (!mounted) return;
 					console.error(err);
 				}),
-		]).then(() => {
-			if (mounted) setMessage(null);
-		}).catch(() => {
-			if (mounted) setMessage({ type: "error", text: "Andmete laadimine ebaõnnestus." });
-		});
+		])
+			.then(() => {
+				if (mounted) setMessage(null);
+			})
+			.catch(() => {
+				if (mounted)
+					setMessage({
+						type: "error",
+						text: "Andmete laadimine ebaõnnestus.",
+					});
+			});
 
 		return () => {
 			mounted = false;
 		};
 	}, []);
+
+	const getTypeForEmail = (type: string) => {
+		switch (type) {
+			case "project":
+				return "Praktika projekt";
+			case "projectFinalThesis":
+				return "Praktika projekt + Lõputöö";
+			case "finalThesis":
+				return "Lõputöö";
+			default:
+				return type;
+		}
+	};
+
+	const getWantsToSuperviseOrWriteForEmail = (value: string) => {
+		switch (value) {
+			case "supervise":
+				return "Soovin juhendada seda projekti";
+			case "write":
+				return "Soovin ise tegeleda selle projektiga";
+			case "no":
+				return "Ei soovi juhendada ega ise tegeleda selle projektiga";
+			default:
+				return value;
+		}
+	};
+
+	const handleSendEmail = async () => {
+		const emailContent = `
+<!DOCTYPE html>
+<html>
+<head>
+	<style>
+		body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+		.container { max-width: 600px; margin: 0 auto; padding: 20px; }
+		h2 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+		.field { margin-bottom: 15px; }
+		.label { font-weight: bold; color: #2c3e50; }
+		.value { color: #555; margin-top: 5px; }
+	</style>
+</head>
+<body>
+	<div class="container">
+		<h2>Uus projekti idee esitatud</h2>
+		<div class="field">
+			<div class="label">Autor:</div>
+			<div class="value">${accountInfo?.firstName} ${accountInfo?.lastName} (${accountInfo?.email})</div>
+		</div>
+		<div class="field">
+			<div class="label">Pealkiri eesti keeles:</div>
+			<div class="value">${formData.titleInEstonian}</div>
+		</div>
+		<div class="field">
+			<div class="label">Pealkiri inglise keeles:</div>
+			<div class="value">${formData.titleInEnglish}</div>
+		</div>
+		<div class="field">
+			<div class="label">Projekti tüüp:</div>
+			<div class="value">${getTypeForEmail(formData.type)}</div>
+		</div>
+		<div class="field">
+			<div class="label">Märksõnad:</div>
+			<div class="value">${formData.tags.join(", ")}</div>
+		</div>
+		<div class="field">
+			<div class="label">Kirjeldus:</div>
+			<div class="value">${formData.description.split('\n').map(line => `<div>${line}</div>`).join('')}</div>
+		</div>
+		<div class="field">
+			<div class="label">Eesmärk:</div>
+			<div class="value">${formData.objective.split('\n').map(line => `<div>${line}</div>`).join('')}</div>
+		</div>
+		<div class="field">
+			<div class="label">Probleem:</div>
+			<div class="value">${formData.problem.split('\n').map(line => `<div>${line}</div>`).join('')}</div>
+		</div>
+		<div class="field">
+			<div class="label">Taust:</div>
+			<div class="value">${formData.background.split('\n').map(line => `<div>${line}</div>`).join('')}</div>
+		</div>
+		<div class="field">
+			<div class="label">Meeskonna minimaalne suurus:</div>
+			<div class="value">${formData.teamSizeMin}</div>
+		</div>
+		<div class="field">
+			<div class="label">Meeskonna maksimaalne suurus:</div>
+			<div class="value">${formData.teamSizeMax}</div>
+		</div>
+		<div class="field">
+			<div class="label">Kommentaar:</div>
+			<div class="value">${formData.comment.split('\n').map(line => `<div>${line}</div>`).join('')}</div>
+		</div>
+		<div class="field">
+			<div class="label">Soovituslikud juhendajad:</div>
+			<div class="value">${formData.supervisors.join(", ")}</div>
+		</div>
+		<div class="field">
+			<div class="label">Soov juhendada või ise tegeleda projektiga:</div>
+			<div class="value">${getWantsToSuperviseOrWriteForEmail(formData.wantsToSuperviseOrWrite)}</div>
+		</div>
+	</div>
+</body>
+</html>
+`;
+		try {
+			var res = await userService.emailAdminsAsync("Uus projekti idee", emailContent);
+			if (res.statusCode && res.statusCode < 300) {
+				setMessage({
+					type: "success",
+					text: `E-kiri saadetud edukalt ${res.data?.sentTo} administraatori(-te)le.`,
+				});
+				return;
+			} else {
+				setMessage({
+					type: "error",
+					text: `E-kirja saatmine ebaõnnestus. Server vastas koodiga ${res.statusCode}.`,
+				});
+			}
+		} catch (error) {
+			setMessage({
+				type: "error",
+				text: `E-kirja saatmine ebaõnnestus - ${(error as Error).message}`,
+			});
+			return;
+		}
+	};
 
 	return (
 		<TTNewContainer>
@@ -120,13 +255,14 @@ export default function SubmitIdea() {
 			<TTNewCard className="mb-4 w-auto">
 				<TTNewCardContent>
 					<Heading as="h3" visual="h5" className="mb-4 font-bold">
-						Submit New Project Idea
+						Esita uus projekti idee
 					</Heading>
 					<form
 						onSubmit={(e) => {
 							e.preventDefault();
 							console.log(formData);
 							// TODO: send data to email
+							handleSendEmail();
 						}}
 					>
 						<FormGroup controlId="titleInEstonian">

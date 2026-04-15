@@ -151,4 +151,43 @@ export class UserService extends BaseService {
 			};
 		}
 	}
+
+	async emailAdminsAsync(subject: string, message: string): Promise<IResultObject<{sentTo: number}>> {
+		const url = `users/emailAdmins`;
+		try {
+			const response = await this.axiosInstance.post(
+				url,
+				{
+					subject,
+					body: message,
+				}
+			);
+
+			console.log("emailAdminsAsync response", response);
+
+			if (response.status <= 300) {
+				return {
+					statusCode: response.status,
+					data: { sentTo: response.data.sentTo },
+				};
+			}
+
+			return {
+				statusCode: response.status,
+				errors: [
+					(
+						response.status.toString() +
+						" " +
+						response.statusText
+					).trim(),
+				],
+			};
+		} catch (error) {
+			console.log("error: ", (error as AxiosError).message);
+			return {
+				statusCode: (error as AxiosError).status ?? 0,
+				errors: [(error as AxiosError).code ?? "???"],
+			};
+		}
+	}
 }

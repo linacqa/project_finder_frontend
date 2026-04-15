@@ -75,6 +75,7 @@ export default function LoginForm() {
 				lastName: userInfo.data!.lastName,
 				role: userInfo.data!.role,
 				userId: userInfo.data!.id,
+				email: userInfo.data!.email,
 			});
 			router.push("/");
 		} catch (error) {

@@ -53,6 +53,7 @@ export default function AppState({
 				lastName: userInfo.data.lastName,
 				role: userInfo.data.role,
 				userId: userInfo.data.id,
+				email: userInfo.data.email,
 			});
 		};
 

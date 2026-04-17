@@ -11,7 +11,7 @@ export class ApplicationService extends BaseEntityService<IApplication, IApplica
 
 	async getCurrentUsersAllAsync(): Promise<IResultObject<IApplication[]>> {
 		try {
-			const response = await this.axiosInstance.get<IApplication[]>(this.basePath)
+			const response = await this.axiosInstance.get<IApplication[]>(this.basePath + '/my')
 
 			console.log('getAll for current user response', response)
 

@@ -63,7 +63,7 @@ export default function GroupCard({
 				</div>
 				{users.length > 0 && (
 					<Heading as="h4" visual="h5">
-						Members:
+						Liikmed:
 					</Heading>
 				)}
 				{users.map((user, index) => (

@@ -21,6 +21,32 @@ export class ProjectService extends BaseEntityService<IProject, IProjectAdd> {
 		super('projects');
 	}
 
+	async getMyAllAsync(): Promise<IResultObject<IProject[]>> {
+		try {
+			const response = await this.axiosInstance.get<IProject[]>(`${this.basePath}/my`)
+
+			console.log('getMyAllAsync response', response)
+
+			if (response.status <= 300) {
+				return {
+					statusCode: response.status,
+					data: response.data
+				}
+			}
+
+			return {
+				statusCode: response.status,
+				errors: [(response.status.toString() + ' ' + response.statusText).trim()],
+			}
+		} catch (error) {
+			console.log('error: ', (error as AxiosError).message)
+			return {
+				statusCode: (error as AxiosError).status ?? 0,
+				errors: [(error as AxiosError).code ?? "???"],
+			}
+		}
+	}
+
 	async searchAsync(search: IProjectSearchParams = {}): Promise<IResultObject<IProjectsSearchResult>> {
 		try {
 			const params = new URLSearchParams();
@@ -37,6 +63,30 @@ export class ProjectService extends BaseEntityService<IProject, IProjectAdd> {
 			const response = await this.axiosInstance.get<IProjectsSearchResult>(`${this.basePath}/search`, {
 				params,
 			});
+
+			if (response.status < 300) {
+				return {
+					statusCode: response.status,
+					data: response.data,
+				};
+			}
+
+			return {
+				statusCode: response.status,
+				errors: [`${response.status} ${response.statusText}`.trim()],
+			};
+		} catch (error) {
+			const axiosError = error as AxiosError;
+			return {
+				statusCode: axiosError.response?.status ?? 0,
+				errors: [axiosError.message ?? axiosError.code ?? "Unknown error"],
+			};
+		}
+	}
+
+	async updateByIdAsync(projectId: string, entity: IProjectAdd): Promise<IResultObject<IProject>> {
+		try {
+			const response = await this.axiosInstance.put<IProject>(`${this.basePath}/${projectId}`, entity);
 
 			if (response.status < 300) {
 				return {

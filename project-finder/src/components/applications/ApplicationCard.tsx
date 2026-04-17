@@ -47,26 +47,26 @@ export default function ApplicationCard({
 							size="sm"
 							onClick={() => handleAccept(application.id)}
 						>
-							Accept
+							Aktsepteeri
 						</TTNewButton>
 						<TTNewButton
 							variant="danger"
 							size="sm"
 							onClick={() => handleDecline(application.id)}
 						>
-							Decline
+							Lükka tagasi
 						</TTNewButton>
 					</div>
 				)}
 				{application.acceptedAt && (
 					<p className="mt-3">
-						Kutse vastu võetud{" "}
+						Vastu võetud{" "}
 						{new Date(application.acceptedAt).toLocaleString()}
 					</p>
 				)}
 				{application.declinedAt && (
 					<p className="mt-3">
-						Kutse tagasi lükatud{" "}
+						Tagasi lükatud{" "}
 						{new Date(application.declinedAt).toLocaleString()}
 					</p>
 				)}

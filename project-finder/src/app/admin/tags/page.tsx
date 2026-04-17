@@ -124,15 +124,15 @@ export default function Tags() {
 				</div>
 			)}
 
-			<h1>Tags</h1>
+			<h1>Sildid</h1>
 
 			<div className="tag-list-container">
 				<TTNewCard className="mb-4 w-auto">
 					<TTNewCardContent>
 						<Heading as="h3" visual="h4" className="mb-3">
-							<div className="mb-2">Add New Tag</div>
+							<div className="mb-2">Lisa uus silt</div>
 							<Input
-								placeholder="New tag name"
+								placeholder="Uue sildi nimi"
 								onChange={(e) => setNewTagName(e.target.value)}
 								value={newTagName}
 							/>
@@ -143,7 +143,7 @@ export default function Tags() {
 								size="sm"
 								onClick={() => handleAddTag(newTagName)}
 							>
-								Add Tag
+								Lisa silt
 							</TTNewButton>
 						</ButtonGroup>
 					</TTNewCardContent>

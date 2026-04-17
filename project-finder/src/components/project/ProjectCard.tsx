@@ -55,7 +55,7 @@ export default function ProjectCard({
 					</Link>
 
 					<div className="d-flex gap-2 flex-wrap">
-						{status === "Closed" ? (
+						{status === "Suletud" ? (
 							<StatusTag
 								className="px-3 lead"
 								type={STATUS_TYPE.DANGER}

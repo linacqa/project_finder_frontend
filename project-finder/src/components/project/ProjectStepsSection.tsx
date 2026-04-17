@@ -29,9 +29,9 @@ function formatDate(value: string) {
 }
 
 function statusVariant(statusName?: string) {
-	if (statusName === "Not Started") return TagVariants.DANGER;
-	if (statusName === "In Progress") return TagVariants.WARNING;
-	if (statusName === "Completed") return TagVariants.SUCCESS;
+	if (statusName === "Pole alustatud") return TagVariants.DANGER;
+	if (statusName === "Protsessis") return TagVariants.WARNING;
+	if (statusName === "Tehtud") return TagVariants.SUCCESS;
 	return TagVariants.INFO;
 }
 

@@ -6,10 +6,10 @@ interface ProjectMetaCardProps {
 }
 
 function statusVariant(statusName?: string) {
-	if (statusName === "Open") return TagVariants.SUCCESS;
-	if (statusName === "Draft") return TagVariants.WARNING;
-	if (statusName === "Archived" || statusName === "Completed") return TagVariants.INFO;
-	if (statusName === "Closed") return TagVariants.DANGER;
+	if (statusName === "Avatud") return TagVariants.SUCCESS;
+	if (statusName === "Mustand") return TagVariants.WARNING;
+	if (statusName === "Arhiveeritud" || statusName === "Tehtud") return TagVariants.INFO;
+	if (statusName === "Suletud") return TagVariants.DANGER;
 	return TagVariants.PRIMARY;
 }
 
@@ -67,28 +67,25 @@ export default function ProjectMetaCard({ project }: ProjectMetaCardProps) {
 								{project?.supervisor && <div>{project.supervisor}</div>}
 							</div>
 
-							{((!project?.users?.some(
-								(u) => u.userProjectRole.name === "External Supervisor",
-							) && project?.externalSupervisor === null) ||
-								project?.externalSupervisor === "") && (
-								<div className="text-muted">Puudub</div>
-							)}
-							{project?.users
-								?.filter((u) => u.userProjectRole.name === "External Supervisor")
-								.map((u, index) => (
-									<div key={index}>
-										{u.user.firstName} {u.user.lastName} ({u.user.email})
-									</div>
-								))}
-
-							{project?.externalSupervisor && (
-								<div>
-									<Heading as="h3" visual="h6" className="mb-2">
-										Kaasjuhendaja
-									</Heading>
-									{project.externalSupervisor}
-								</div>
-							)}
+							<div>
+								<Heading as="h3" visual="h6" className="mb-2">
+									Kaasjuhendaja
+								</Heading>
+								{((!project?.users?.some(
+									(u) => u.userProjectRole.name === "External Supervisor",
+								) && project?.externalSupervisor === null) ||
+									project?.externalSupervisor === "") && (
+									<div className="text-muted">Puudub</div>
+								)}
+								{project?.users
+									?.filter((u) => u.userProjectRole.name === "External Supervisor")
+									.map((u, index) => (
+										<div key={index}>
+											{u.user.firstName} {u.user.lastName} ({u.user.email})
+										</div>
+									))}
+								{project?.externalSupervisor && <div>{project.externalSupervisor}</div>}
+							</div>
 						</div>
 					</div>
 					<div>

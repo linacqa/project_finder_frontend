@@ -124,15 +124,15 @@ export default function Steps() {
 				</div>
 			)}
 
-			<h1>Steps</h1>
+			<h1>Etapid</h1>
 
 			<div className="tag-list-container">
 				<TTNewCard className="mb-4 w-auto">
 					<TTNewCardContent>
 						<Heading as="h3" visual="h4" className="mb-3">
-							<div className="mb-2">Add New Step</div>
+							<div className="mb-2">Lisa uus etapp</div>
 							<Input
-								placeholder="New Step name"
+								placeholder="Uue etapi nimi"
 								onChange={(e) => setNewStepName(e.target.value)}
 								value={newStepName}
 							/>
@@ -143,7 +143,7 @@ export default function Steps() {
 								size="sm"
 								onClick={() => handleAddStep(newStepName)}
 							>
-								Add Step
+								Lisa etapp
 							</TTNewButton>
 						</ButtonGroup>
 					</TTNewCardContent>

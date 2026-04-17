@@ -11,6 +11,7 @@ export abstract class BaseService {
 	constructor() {
 		this.axiosInstance = axios.create({
 			baseURL: "http://localhost:5231/api/v1.0/",
+			// baseUrl: "/api/api/v1.0/",
 			headers: {
 				"Content-Type": "application/json",
 				Accept: "application/json",

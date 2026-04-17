@@ -91,7 +91,7 @@ export default function ApplicationsPage() {
 					></TTNewAlert>
 				</div>
 			)}
-			<h1>Applications</h1>
+			<h1>Kandideerimised</h1>
 			<div className="application-list-container">
 				{applications.map((application) => (
 					<ApplicationCard

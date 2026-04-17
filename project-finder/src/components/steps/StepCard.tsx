@@ -19,14 +19,14 @@ export default function StepCard({ id, name, onDelete, onUpdate }: { id: string;
 				</Heading>
 				<ButtonGroup>
 					<TTNewButton variant="primary" size="sm" onClick={() => onUpdate(id, newName)}>
-						Save
+						Salvesta
 					</TTNewButton>
 					<TTNewButton
 						variant="danger"
 						size="sm"
 						onClick={() => setShowDeleteModal(true)}
 					>
-						Delete
+						Kustuta
 					</TTNewButton>
 				</ButtonGroup>
 				<ConfirmationModal

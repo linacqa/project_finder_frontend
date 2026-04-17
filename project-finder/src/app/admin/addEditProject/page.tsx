@@ -5,6 +5,7 @@ import { ProjectTypeService } from "@/services/ProjectTypeService";
 import { UserService } from "@/services/UserService";
 import { TagService } from "@/services/TagService";
 import { StepService } from "@/services/StepService";
+import { ProjectStepService } from "@/services/ProjectStepService";
 import { ProjectService } from "@/services/ProjectService";
 import { IProjectAdd } from "@/types/domain/IProjectAdd";
 import { useEffect, useState } from "react";
@@ -25,7 +26,8 @@ import {
 	TTNewContainer,
 } from "taltech-styleguide";
 import dayjs from "dayjs";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import ConfirmationModal from "@/components/modal/ConfirmationModal";
 
 export default function AddProject() {
 	const [project, setProject] = useState<IProjectAdd>({
@@ -84,13 +86,20 @@ export default function AddProject() {
 		text: string;
 	} | null>(null);
 
-	const router = useRouter();
+	const [showDeleteModal, setShowDeleteModal] = useState(false);
 
+	const router = useRouter();
+	const searchParams = useSearchParams();
+	const projectIdToEdit = searchParams.get("id")?.trim() || null;
+	const isEditMode = !!projectIdToEdit;
+
+	const projectService = new ProjectService();
 	const projectTypeService = new ProjectTypeService();
 	const projectStatusService = new ProjectStatusService();
 	const tagService = new TagService();
 	const userService = new UserService();
 	const stepService = new StepService();
+	const projectStepService = new ProjectStepService();
 
 	useEffect(() => {
 		let mounted = true;
@@ -105,6 +114,8 @@ export default function AddProject() {
 					authorsRes,
 					supervisorsRes,
 					stepsRes,
+					projectRes,
+					projectStepsRes,
 				] = await Promise.all([
 					projectTypeService.getAllAsync(),
 					projectStatusService.getAllAsync(),
@@ -112,6 +123,12 @@ export default function AddProject() {
 					userService.getAllAsync(),
 					userService.getAllSupervisorsAsync(),
 					stepService.getAllAsync(),
+					isEditMode && projectIdToEdit
+						? projectService.getByIdAsync(projectIdToEdit)
+						: Promise.resolve(null),
+					isEditMode && projectIdToEdit
+						? projectStepService.getAllByProjectIdAsync(projectIdToEdit)
+						: Promise.resolve(null),
 				]);
 
 				if (!mounted) return;
@@ -164,6 +181,44 @@ export default function AddProject() {
 					);
 				}
 
+				if (isEditMode && projectRes?.data) {
+					const loadedProject = projectRes.data;
+
+					const authorId = loadedProject.users.find((u) => u.userProjectRole.name === "Author")?.userId || "";
+					const primarySupervisorId = loadedProject.users.find((u) => u.userProjectRole.name === "Supervisor")?.userId || null;
+					const externalSupervisorId = loadedProject.users.find((u) => u.userProjectRole.name === "External Supervisor")?.userId || null;
+
+					setSupervisorIsRegistered(!!primarySupervisorId);
+					setExternalSupervisorIsRegistered(!!externalSupervisorId);
+
+					setProject((prev) => ({
+						...prev,
+						authorId,
+						titleInEstonian: loadedProject.titleInEstonian ?? "",
+						titleInEnglish: loadedProject.titleInEnglish ?? "",
+						description: loadedProject.description ?? "",
+						client: loadedProject.client ?? null,
+						minStudents: loadedProject.minStudents ?? 1,
+						maxStudents: loadedProject.maxStudents ?? 1,
+						projectTypeId: loadedProject.projectTypeId ?? "",
+						projectStatusId: loadedProject.projectStatusId ?? "",
+						deadline: loadedProject.deadline ?? null,
+						tagIds: loadedProject.tags?.map((t) => t.id) ?? [],
+						stepIds:
+							projectStepsRes?.data?.map((projectStep) =>
+								projectStep.stepId,
+							) ?? [],
+						primarySupervisorId,
+						primarySupervisor: primarySupervisorId
+							? null
+							: (loadedProject.supervisor ?? null),
+						externalSupervisorId,
+						externalSupervisor: externalSupervisorId
+							? null
+							: (loadedProject.externalSupervisor ?? null),
+					}));
+				}
+
 				setMessage(null);
 			} catch (error) {
 				if (!mounted) return;
@@ -181,7 +236,7 @@ export default function AddProject() {
 		return () => {
 			mounted = false;
 		};
-	}, []);
+	}, [isEditMode, projectIdToEdit]);
 
 	const handleStringFieldChange = (
 		field: keyof IProjectAdd,
@@ -190,7 +245,7 @@ export default function AddProject() {
 		setProject({ ...project, [field]: value });
 	};
 
-	const handleSave = () => {
+	const handleSave = async () => {
 		if (!project.titleInEstonian.trim()) {
 			setMessage({
 				type: "error",
@@ -227,22 +282,65 @@ export default function AddProject() {
 			return;
 		}
 
-		const projectService = new ProjectService();
-		projectService.addAsync(project).then((res) => {
-			if (res && res.data) {
-				router.push("/admin/allProjects");
-				console.log("Project created with id: ", res.data.id);
+		setMessage({
+			type: "loading",
+			text: isEditMode
+				? "Salvestan projekti muudatusi..."
+				: "Loon projekti...",
+		});
+
+		try {
+			const res =
+				isEditMode && projectIdToEdit
+					? await projectService.updateByIdAsync(projectIdToEdit, project)
+					: await projectService.addAsync(project);
+
+			if (res && res.data || (isEditMode && res.statusCode && res.statusCode <= 300)) {
 				setMessage({
 					type: "success",
-					text: "Projekt edukalt loodud!",
+					text: isEditMode
+						? "Projekt edukalt uuendatud!"
+						: "Projekt edukalt loodud!",
 				});
-			} else {
-				setMessage({
-					type: "error",
-					text: "Projekti loomine ebaõnnestus.",
-				});
+				router.push("/");
+				return;
 			}
-		});
+
+			setMessage({
+				type: "error",
+				text: isEditMode
+					? "Projekti uuendamine ebaõnnestus."
+					: "Projekti loomine ebaõnnestus.",
+			});
+		} catch (error) {
+			console.error(error);
+			setMessage({
+				type: "error",
+				text: isEditMode
+					? "Projekti uuendamine ebaõnnestus."
+					: "Projekti loomine ebaõnnestus.",
+			});
+		}
+	};
+
+	const handleDeleteConfirm = async () => {
+		if (!projectIdToEdit) return;
+
+		setMessage({ type: "loading", text: "Kustutan projekti..." });
+
+		try {
+			const res = await projectService.deleteByIdAsync(projectIdToEdit);
+
+			if (res && res.statusCode && res.statusCode <= 300) {
+				setMessage({ type: "success", text: "Projekt edukalt kustutatud!" });
+				router.push("/");
+				return;
+			}
+
+			setMessage({ type: "error", text: "Projekti kustutamine ebaõnnestus." });
+		} catch (error) {
+			setMessage({ type: "error", text: "Projekti kustutamine ebaõnnestus." });
+		}
 	};
 
 	return (
@@ -269,6 +367,9 @@ export default function AddProject() {
 				<TTNewCard className="mb-4 w-auto">
 					<TTNewCardContent className="grid-container">
 						<div className="d-flex flex-column gap-3">
+							<Heading as="h3" visual="h3">
+								{isEditMode ? "Muuda projekti" : "Lisa projekt"}
+							</Heading>
 							<div>
 								<Heading as="h4" visual="h4">
 									Pealkiri eesti keeles
@@ -797,7 +898,7 @@ export default function AddProject() {
 									<strong>Tähtaeg:</strong>
 								</div>
 								<DateTimePicker
-									value={dayjs(project.deadline) || null}
+									value={project.deadline ? dayjs(project.deadline) : null}
 									onChange={(date) => {
 										setProject({
 											...project,
@@ -814,29 +915,6 @@ export default function AddProject() {
 								>
 									Projekti staatus
 								</Heading>
-								{/* <div className="d-flex gap-3">
-								{projectStatusOptions.map((option) => (
-
-										<CustomInput
-											id={`project-status-${option.id}`}
-											name="projectStatus"
-											label={option.label}
-											type="radio"
-											inline
-											checked={
-												project.projectStatusId ===
-												option.id
-											}
-											onChange={() =>
-												setProject({
-													...project,
-													projectStatusId: option.id,
-												})
-											}
-										/>
-
-								))}
-								</div> */}
 								<Dropdown className="my-3">
 									<Dropdown.Toggle
 										variant="outline"
@@ -896,17 +974,19 @@ export default function AddProject() {
 											variant="success"
 											type="submit"
 										>
-											Lisa projekt
+											{isEditMode
+												? "Salvesta muudatused"
+												: "Lisa projekt"}
 										</TTNewButton>
 									</ButtonGroup>
 								</form>
 
-								{/* <ButtonGroup className="my-6">
+								<ButtonGroup className="my-6">
 									<TTNewButton
 										variant="danger"
 										onClick={() => setShowDeleteModal(true)}
 									>
-										Eemalda teema
+										Kustuta teema
 									</TTNewButton>
 								</ButtonGroup>
 
@@ -916,14 +996,13 @@ export default function AddProject() {
 									title="Kas olete kindel?"
 									text="Kas soovite selle lõputöö teema jäädavalt kustutada? Seda toimingut ei saa tagasi võtta."
 									confirmText="Jah, kustuta"
-									// confirmAction={handleDeleteConfirm}
-									confirmAction={() => {}}
-								/> */}
+									confirmAction={handleDeleteConfirm}
+								/>
 
 								<ButtonGroup
 									className="mt-4"
 									onClick={() => {
-										// handleSave();
+										router.push("/");
 									}}
 								>
 									<TTNewButton

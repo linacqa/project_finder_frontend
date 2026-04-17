@@ -68,7 +68,7 @@ export default function Header() {
 								? [
 										{
 											children: "Lisa uus projekt",
-											href: "/admin/addProject",
+											href: "/admin/addEditProject",
 										},
 										{
 											children: "Kandideerimised",
@@ -102,9 +102,8 @@ export default function Header() {
 						? {
 								links: [
 									{
-										// TODO
-										children: "Minu lõputöö(-d)",
-										href: "/my-thesis",
+										children: "Minu projektid",
+										href: "/myProjects",
 									},
 									{
 										children: "Minu kutsed",

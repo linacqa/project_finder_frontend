@@ -53,14 +53,14 @@ export default function InvitationCard({
 							size="sm"
 							onClick={() => onAccept(invite.id)}
 						>
-							Accept
+							Aktsepteeri
 						</TTNewButton>
 						<TTNewButton
 							variant="danger"
 							size="sm"
 							onClick={() => onDecline(invite.id)}
 						>
-							Decline
+							Lükka tagasi
 						</TTNewButton>
 					</div>
 				)}

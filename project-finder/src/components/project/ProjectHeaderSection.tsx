@@ -1,17 +1,32 @@
+import { AccountContext } from "@/context/AccountContext";
 import { IProject } from "@/types/domain/IProject";
-import { Heading, Separator, Tag, TagVariants, TTNewContainer } from "taltech-styleguide";
+import { useRouter } from "next/navigation";
+import { useContext } from "react";
+import { Heading, Separator, Tag, TagVariants, TTNewButton, TTNewContainer } from "taltech-styleguide";
 
 interface ProjectHeaderSectionProps {
 	project: IProject;
 }
 
 export default function ProjectHeaderSection({ project }: ProjectHeaderSectionProps) {
+	const { accountInfo } = useContext(AccountContext);
+	const router = useRouter();
+
 	const author = project.users?.find(
 		(userProject) => userProject.userProjectRole.name === "Author",
 	)?.user;
 
 	return (
 		<TTNewContainer className="py-3">
+			{accountInfo?.role === "admin" && (
+				<TTNewButton
+					variant="outline"
+					className="mb-3"
+					onClick={() => router.push(`/admin/addEditProject?id=${project.id}`)}
+				>
+					Muuda projekt
+				</TTNewButton>
+			)}
 			<Heading as="h1" visual="h1" className="mb-2">
 				{project.titleInEstonian}
 			</Heading>

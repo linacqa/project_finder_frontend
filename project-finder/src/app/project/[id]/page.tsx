@@ -26,6 +26,7 @@ import { ProjectStepService } from "@/services/ProjectStepService";
 import ProjectStepsSection from "@/components/project/ProjectStepsSection";
 import { IStepStatus } from "@/types/domain/IStepStatus";
 import { StepStatusService } from "@/services/StepStatusService";
+import { set } from "react-hook-form";
 
 export default function ProjectDetails({
 	params,
@@ -175,6 +176,15 @@ export default function ProjectDetails({
 							type: "success",
 							text: "Kandidatuur saadetud.",
 						});
+						applicationService
+							.getCurrentUsersApplicationByProjectIdAsync(
+								projectId,
+							)
+							.then((applicationRes) => {
+								if (applicationRes?.data) {
+									setApplication(applicationRes.data);
+								}
+							});
 						return;
 					}
 
@@ -187,6 +197,32 @@ export default function ProjectDetails({
 			setMessage({
 				type: "error",
 				text: "Kandidatuuri saatmine ebaõnnestus.",
+			});
+		}
+	};
+
+	const deleteApplication = (applicationId: string) => {
+		setMessage({ type: "loading", text: "Kustutan kandideerimist..." });
+		try {
+			applicationService.deleteByIdAsync(applicationId).then((res) => {
+				if (res && res.statusCode && res.statusCode <= 300) {
+					setApplication(null);
+					setMessage({
+						type: "success",
+						text: "Kandideerimine kustutatud.",
+					});
+					return;
+				}
+
+				setMessage({
+					type: "error",
+					text: `${res.statusCode ?? "Error"} - ${res.errors}`,
+				});
+			});
+		} catch (err) {
+			setMessage({
+				type: "error",
+				text: "Kandideerimise kustutamine ebaõnnestus.",
 			});
 		}
 	};
@@ -305,6 +341,7 @@ export default function ProjectDetails({
 							selectedGroupId={selectedGroupId}
 							setSelectedGroupId={setSelectedGroupId}
 							onApply={addApplication}
+							onDelete={deleteApplication}
 						/>
 						<ProjectMetaCard project={project} />
 					</div>
@@ -313,9 +350,9 @@ export default function ProjectDetails({
 				{project?.users &&
 					accountInfo &&
 					(accountInfo.role === "admin" ||
-					project.users.some(
-						(u) => u.user.id === accountInfo.userId,
-					)) && (
+						project.users.some(
+							(u) => u.user.id === accountInfo.userId,
+						)) && (
 						<>
 							<ProjectStepsSection
 								projectSteps={projectSteps}

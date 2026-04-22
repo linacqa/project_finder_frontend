@@ -232,9 +232,11 @@ export default function ProjectDetails({
 		try {
 			commentService.deleteByIdAsync(commentId).then((res) => {
 				if (res && res.statusCode && res.statusCode <= 300) {
-					setComments((prev) =>
-						prev.filter((comment) => comment.id !== commentId),
-					);
+					commentService.getAllByProjectIdAsync(projectId).then((commentsRes) => {
+						if (commentsRes?.data) {
+							setComments(commentsRes.data);
+						}
+					});
 					setMessage({
 						type: "success",
 						text: "Kommentaar kustutatud.",
@@ -325,6 +327,34 @@ export default function ProjectDetails({
 		});
 	};
 
+	const postReply = async (replyToCommentId: string, content: string) => {
+		if (content.trim() === "") {
+			setMessage({
+				type: "error",
+				text: "Vastus ei saa olla tühi.",
+			});
+			return;
+		}
+
+		setMessage({ type: "loading", text: "Postitan vastust..." });
+		const res = await commentService.addAsync({
+			projectId: projectId,
+			content,
+			replyToCommentId,
+		});
+
+		if (res && res.statusCode && res.statusCode <= 300 && res.data) {
+			await loadComments();
+			setMessage({ type: "success", text: "Vastus postitatud." });
+			return;
+		}
+
+		setMessage({
+			type: "error",
+			text: `${res.statusCode ?? "Error"} - ${res.errors}`,
+		});
+	};
+
 	return (
 		<>
 			{message && (
@@ -396,12 +426,12 @@ export default function ProjectDetails({
 								}
 							/>
 
-							{/* TODO: add option to reply to comments and show comment threads */}
 							<CommentsSection
 								comments={comments}
 								newComment={newComment}
 								setNewComment={setNewComment}
 								onPostComment={postComment}
+								onPostReply={postReply}
 								onDelete={deleteComment}
 							/>
 						</>

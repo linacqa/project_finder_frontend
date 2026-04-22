@@ -12,6 +12,40 @@ export class InvitationService extends BaseEntityService<
 		super("invitations");
 	}
 
+	async allAsyncByGroupId(groupId: string): Promise<IResultObject<IInvitation[]>> {
+		try {
+			const response = await this.axiosInstance.get<IInvitation[]>(
+				this.basePath + `/group/${groupId}`,
+			);
+
+			console.log("allAsyncByGroupId response", response);
+
+			if (response.status <= 300) {
+				return {
+					statusCode: response.status,
+					data: response.data,
+				};
+			}
+
+			return {
+				statusCode: response.status,
+				errors: [
+					(
+						response.status.toString() +
+						" " +
+						response.statusText
+					).trim(),
+				],
+			};
+		} catch (error) {
+			console.log("error: ", (error as AxiosError).message);
+			return {
+				statusCode: (error as AxiosError).status ?? 0,
+				errors: [(error as AxiosError).code ?? "???"],
+			};
+		}
+	}
+
 	async acceptByIdAsync(id: string): Promise<IResultObject<IInvitation>> {
 		try {
 			const response = await this.axiosInstance.put<IInvitation>(

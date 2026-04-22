@@ -105,7 +105,7 @@ export default function MyProjectsPage() {
 				<h1>Minu projektid</h1>
 				<p>
 					Siin näete kõiki projekte, millega olete seotud, ja
-					kandideerimisi.
+					kandideerimisi, kui olete üliõpilane.
 				</p>
 				{projects.map((project) => (
 					<MyProjectCard

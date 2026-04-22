@@ -227,6 +227,34 @@ export default function ProjectDetails({
 		}
 	};
 
+	const deleteComment = (commentId: string) => {
+		setMessage({ type: "loading", text: "Kustutan kommentaari..." });
+		try {
+			commentService.deleteByIdAsync(commentId).then((res) => {
+				if (res && res.statusCode && res.statusCode <= 300) {
+					setComments((prev) =>
+						prev.filter((comment) => comment.id !== commentId),
+					);
+					setMessage({
+						type: "success",
+						text: "Kommentaar kustutatud.",
+					});
+					return;
+				}
+
+				setMessage({
+					type: "error",
+					text: `${res.statusCode ?? "Error"} - ${res.errors}`,
+				});
+			});
+		} catch (err) {
+			setMessage({
+				type: "error",
+				text: "Kommentaari kustutamine ebaõnnestus.",
+			});
+		}
+	};
+
 	const updateStepStatus = async (
 		projectStepStatusId: string,
 		newStatusId: string,
@@ -374,6 +402,7 @@ export default function ProjectDetails({
 								newComment={newComment}
 								setNewComment={setNewComment}
 								onPostComment={postComment}
+								onDelete={deleteComment}
 							/>
 						</>
 					)}

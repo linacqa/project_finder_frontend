@@ -39,16 +39,17 @@ export default function Header() {
 							...(accountInfo?.jwt
 								? [
 										{
-											children: "Deklareeri uus projekti idee",
+											children:
+												"Deklareeri uus projekti idee",
 											href: "/submitIdea",
 										},
 									]
 								: []),
 							...(accountInfo?.jwt
-								// &&
-							// (accountInfo.role === "student" ||
-							// 	accountInfo.role === "teacher")
-								? [
+								? // &&
+									// (accountInfo.role === "student" ||
+									// 	accountInfo.role === "teacher")
+									[
 										{
 											children: "Projektid",
 											href: "/",
@@ -56,7 +57,7 @@ export default function Header() {
 									]
 								: []),
 							...(accountInfo?.jwt &&
-							(accountInfo.role === "student")
+							accountInfo.role === "student"
 								? [
 										{
 											children: "Grupid",
@@ -105,10 +106,14 @@ export default function Header() {
 										children: "Minu projektid",
 										href: "/myProjects",
 									},
-									{
-										children: "Minu kutsed",
-										href: "/myInvitations",
-									},
+									...(accountInfo.role === "student"
+										? [
+												{
+													children: "Minu kutsed",
+													href: "/myInvitations",
+												},
+											]
+										: []),
 									{
 										children: "Logi välja",
 										href: "/",

@@ -1,10 +1,13 @@
 "use client";
 
+import ConfirmationModal from "@/components/modal/ConfirmationModal";
 import { AccountContext } from "@/context/AccountContext";
 import { GroupService } from "@/services/GroupService";
 import { InvitationService } from "@/services/InvitationService";
 import { UserService } from "@/services/UserService";
 import { IGroup } from "@/types/domain/IGroup";
+import { IInvitation } from "@/types/domain/IInvitation";
+import { useRouter } from "next/dist/client/components/navigation";
 import { use, useContext, useEffect, useState } from "react";
 import {
 	ALERT_POSITION_TYPES,
@@ -14,6 +17,8 @@ import {
 	Input,
 	STATUS_TYPE,
 	StatusTag,
+	Tag,
+	TagVariants,
 	TTNewAlert,
 	TTNewButton,
 	TTNewCard,
@@ -21,6 +26,14 @@ import {
 	TTNewContainer,
 	Typeahead,
 } from "taltech-styleguide";
+
+function formatDate(value: string) {
+	return new Date(value).toLocaleDateString("et-EE", {
+		year: "numeric",
+		month: "2-digit",
+		day: "2-digit",
+	});
+}
 
 export default function GroupDetails({
 	params,
@@ -45,6 +58,19 @@ export default function GroupDetails({
 		type: string;
 		text: string;
 	} | null>(null);
+
+	const [showDeleteModal, setShowDeleteModal] = useState(false);
+	const [memberIdToDelete, setMemberIdToDelete] = useState<string | null>(
+		null,
+	);
+
+	const [invitationIdToDelete, setInvitationIdToDelete] = useState<
+		string | null
+	>(null);
+
+	const [invitations, setInvitations] = useState<IInvitation[]>([]);
+
+	const router = useRouter();
 
 	const groupService = new GroupService();
 	const userService = new UserService();
@@ -72,6 +98,67 @@ export default function GroupDetails({
 		});
 	};
 
+	const handleDeleteGroup = async () => {
+		setShowDeleteModal(false);
+		setMessage({ type: "loading", text: "Kustutan gruppi..." });
+		const res = await groupService.deleteByIdAsync(groupId);
+
+		if (res && res.statusCode && res.statusCode <= 300) {
+			setMessage({ type: "success", text: "Grupp kustutatud." });
+			router.push("/groups");
+			return;
+		} else {
+			setMessage({
+				type: "error",
+				text: `${res.statusCode ?? "Error"} - ${res.errors}`,
+			});
+		}
+	};
+
+	const handleDeleteMember = async (memberId: string) => {
+		setMemberIdToDelete(null);
+		setMessage({ type: "loading", text: "Eemaldan liiget..." });
+		const res = await groupService.deleteMemberByIdAsync(memberId);
+
+		if (res && res.statusCode && res.statusCode <= 300) {
+			setGroup((currentGroup) =>
+				currentGroup
+					? {
+							...currentGroup,
+							users: currentGroup.users.filter(
+								(member) => member.id !== memberId,
+							),
+						}
+					: currentGroup,
+			);
+			setMessage({ type: "success", text: "Liige eemaldatud." });
+			return;
+		}
+
+		setMessage({
+			type: "error",
+			text: `${res.statusCode ?? "Error"} - ${res.errors}`,
+		});
+	};
+
+	const handleDeleteInvitation = async (invitationId: string) => {
+		setMessage({ type: "loading", text: "Kustutan kutset..." });
+		const res = await invitationService.deleteByIdAsync(invitationId);
+
+		if (res && res.statusCode && res.statusCode <= 300) {
+			setInvitations((currentInvitations) =>
+				currentInvitations.filter((i) => i.id !== invitationId),
+			);
+			setMessage({ type: "success", text: "Kutse kustutatud." });
+			return;
+		}
+
+		setMessage({
+			type: "error",
+			text: `${res.statusCode ?? "Error"} - ${res.errors}`,
+		});
+	};
+
 	useEffect(() => {
 		let mounted = true;
 		setMessage({ type: "loading", text: "Laadin grupi andmeid..." });
@@ -79,7 +166,8 @@ export default function GroupDetails({
 		Promise.all([
 			groupService.getByIdAsync(groupId),
 			userService.getAllStudentsAsync(),
-		]).then(([groupRes, studentsRes]) => {
+			invitationService.allAsyncByGroupId(groupId),
+		]).then(([groupRes, studentsRes, invitationsRes]) => {
 			if (!mounted) return;
 
 			if (groupRes.data) {
@@ -95,7 +183,15 @@ export default function GroupDetails({
 				);
 			}
 
-			if (groupRes.data && studentsRes.data) {
+			if (invitationsRes.data) {
+				setInvitations(invitationsRes.data);
+			}
+
+			if (
+				groupRes.data &&
+				studentsRes.data &&
+				(invitationsRes.data || invitationsRes.statusCode === 401)
+			) {
 				setMessage(null);
 				return;
 			}
@@ -109,6 +205,11 @@ export default function GroupDetails({
 			if (!studentsRes.data) {
 				errors.push(
 					`Üliõpilaste laadimine: ${studentsRes.statusCode ?? "Error"} - ${studentsRes.errors}`,
+				);
+			}
+			if (!invitationsRes.data && invitationsRes.statusCode !== 401) {
+				errors.push(
+					`Kutsete laadimine: ${invitationsRes.statusCode ?? "Error"} - ${invitationsRes.errors}`,
 				);
 			}
 
@@ -146,32 +247,84 @@ export default function GroupDetails({
 			<Heading as="h1" visual="h2">
 				{group?.name}
 			</Heading>
+			{group?.creatorId === accountInfo?.userId && (
+				<>
+					<TTNewButton
+						className="float-end"
+						variant="danger"
+						size="sm"
+						onClick={() => setShowDeleteModal(true)}
+					>
+						Kustuta
+					</TTNewButton>
+					<ConfirmationModal
+						show={showDeleteModal}
+						hideAction={() => setShowDeleteModal(false)}
+						title="Kas olete kindel?"
+						text="Kas soovite selle grupi jäädavalt kustutada? Seda toimingut ei saa tagasi võtta."
+						confirmText="Jah, kustuta"
+						confirmAction={handleDeleteGroup}
+					/>
+				</>
+			)}
 			<Heading as="h2" visual="h6" className="mb-3">
-				Creator: {group?.creator?.firstName} {group?.creator.lastName} (
+				Looja: {group?.creator?.firstName} {group?.creator.lastName} (
 				{group?.creator.email})
 			</Heading>
 			{group?.users && group.users.length > 0 && (
 				<Heading as="h4" visual="h5">
-					Members:
+					Liikmed:
 				</Heading>
 			)}
-			{group?.users.map((user, index) => (
-				<StatusTag key={user.id} type={STATUS_TYPE.INFO}>
-					{user.user.firstName} {user.user.lastName} (
-					{user.user.email}) - {user.role}
-				</StatusTag>
+			{group?.users.map((user) => (
+				<div
+					key={user.id}
+					className="d-flex align-items-center gap-2 mb-2"
+				>
+					<StatusTag type={STATUS_TYPE.INFO}>
+						{user.user.firstName} {user.user.lastName} (
+						{user.user.email}) - {user.role}
+					</StatusTag>
+					{group?.creatorId === accountInfo?.userId &&
+						user.userId !== accountInfo?.userId && (
+							<TTNewButton
+								variant="danger"
+								size="xs"
+								onClick={() => setMemberIdToDelete(user.id)}
+							>
+								X
+							</TTNewButton>
+						)}
+				</div>
 			))}
+			<ConfirmationModal
+				show={memberIdToDelete !== null}
+				hideAction={() => setMemberIdToDelete(null)}
+				title="Kas olete kindel?"
+				text="Kas soovite selle liikme grupist eemaldada? Seda toimingut ei saa tagasi võtta."
+				confirmText="Jah, eemalda"
+				confirmAction={() => {
+					if (memberIdToDelete) {
+						handleDeleteMember(memberIdToDelete);
+					}
+				}}
+			/>
 			{accountInfo?.jwt && accountInfo.userId == group?.creatorId && (
 				<TTNewCard className="mt-5">
 					<TTNewCardContent>
 						<Heading as="h3" visual="h4" className="mb-3">
-							Invite new members
+							Kutsu uusi liikmeid
 						</Heading>
 						<Typeahead
 							clearButton
 							id="students"
-							options={studentOptions}
-							placeholder="Choose student"
+							options={studentOptions.filter(
+								(option) =>
+									!group?.users.some(
+										(user) => user.userId === option.value,
+									),
+							)}
+							placeholder="Vali üliõpilane"
 							positionFixed
 							selected={selectedStudent ? [selectedStudent] : []}
 							onChange={(selected) => {
@@ -185,18 +338,81 @@ export default function GroupDetails({
 						/>
 						<Input
 							className="mt-3"
-							placeholder="Role"
+							placeholder="Roll grupis"
 							value={inviteRole}
 							onChange={(e) => setInviteRole(e.target.value)}
 						/>
 						<TTNewButton className="mt-3" onClick={handleInvite}>
-							Send invite
+							Saada kutse
 						</TTNewButton>
 					</TTNewCardContent>
 				</TTNewCard>
 			)}
-			{/* TODO: show sent invitations with statuses and option to cancel
-			TODO: show applications for projects */}
+			{invitations.length > 0 && (
+				<div className="mt-5">
+					<Heading as="h3" visual="h4" className="mb-3">
+						Saadetud kutsed:
+					</Heading>
+					{invitations.map((invitation) => (
+						<TTNewCard key={invitation.id} className="mb-3 w-auto">
+							<TTNewCardContent>
+								<h5>
+									{invitation.toUser.firstName}{" "}
+									{invitation.toUser.lastName} (
+									{invitation.toUser.email})
+								</h5>
+								<p>Roll: {invitation.role}</p>
+								{!invitation.acceptedAt &&
+									!invitation.declinedAt && (
+										<Tag
+											text="Ootel"
+											variant={TagVariants.WARNING}
+										/>
+									)}
+								{invitation.acceptedAt && (
+									<Tag
+										text={`Aktsepteeritud ${formatDate(invitation.acceptedAt)}`}
+										variant={TagVariants.SUCCESS_FILLED}
+									/>
+								)}
+								{invitation.declinedAt && (
+									<Tag
+										text={`Tagasi lükatud ${formatDate(invitation.declinedAt)}`}
+										variant={TagVariants.DANGER_FILLED}
+									/>
+								)}
+								{!invitation.acceptedAt &&
+									accountInfo?.userId ===
+										group?.creatorId && (
+										<TTNewButton
+											variant="danger"
+											size="xs"
+											className="float-end"
+											onClick={() =>
+												setInvitationIdToDelete(
+													invitation.id,
+												)
+											}
+										>
+											Kustuta
+										</TTNewButton>
+									)}
+							</TTNewCardContent>
+						</TTNewCard>
+					))}
+					<ConfirmationModal
+						show={invitationIdToDelete !== null}
+						hideAction={() => setInvitationIdToDelete(null)}
+						title="Kas olete kindel?"
+						text="Kas soovite selle kutse kustutada? Seda toimingut ei saa tagasi võtta."
+						confirmText="Jah, kustuta"
+						confirmAction={() => {
+							handleDeleteInvitation(invitationIdToDelete!);
+						}}
+					/>
+				</div>
+			)}
+			{/* TODO: show applications for projects */}
 		</TTNewContainer>
 	);
 }

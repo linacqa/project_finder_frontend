@@ -53,10 +53,18 @@ export default function Groups() {
 			.addAsync({ name, creatorRoleInGroup: role })
 			.then((res) => {
 				if (res && res.data) {
-					setGroups((prevGroups) => [
-						...prevGroups,
-						res.data as IGroup,
-					]);
+					groupService.getAllAsync().then((res) => {
+						if (res.data) {
+							setGroups(res.data);
+							setMessage(null);
+							return;
+						}
+
+						setMessage({
+							type: "error",
+							text: `${res.statusCode ?? "Error"} - ${res.errors}`,
+						});
+					});
 					setNewGroupName("");
 					setRoleInGroup("");
 					setMessage({ type: "success", text: "Grupp loodud." });
@@ -96,17 +104,17 @@ export default function Groups() {
 				<TTNewCard className="mb-4 w-auto">
 					<TTNewCardContent>
 						<Heading as="h3" visual="h4" className="mb-3">
-							<div className="mb-2">Create New Group</div>
+							<div className="mb-2">Loo uus grupp</div>
 							<Input
 								className="mb-2"
-								placeholder="New group name"
+								placeholder="Uue grupi nimi"
 								onChange={(e) =>
 									setNewGroupName(e.target.value)
 								}
 								value={newGroupName}
 							/>
 							<Input
-								placeholder="Your role in group (e.g. frontend developer)"
+								placeholder="Teie roll grupis (nt. frontend arendaja)"
 								onChange={(e) => setRoleInGroup(e.target.value)}
 								value={roleInGroup}
 							/>
@@ -119,7 +127,7 @@ export default function Groups() {
 									handleCreateGroup(newGroupName, roleInGroup)
 								}
 							>
-								Create Group
+								Loo grupp
 							</TTNewButton>
 						</ButtonGroup>
 					</TTNewCardContent>

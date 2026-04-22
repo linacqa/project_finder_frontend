@@ -38,7 +38,7 @@ export default function GroupCard({
 	return (
 		<TTNewCard className="mb-4 w-auto" key={id}>
 			<TTNewCardContent>
-				{accountInfo?.jwt && accountInfo.userId === creator.id ? (
+				{accountInfo?.jwt && accountInfo.userId === creator?.id ? (
 					<Link href={`/groups/${id}`} passHref>
 						<Heading as="h3" visual="h4" className="mb-3">
 							{name}
@@ -50,7 +50,7 @@ export default function GroupCard({
 					</Heading>
 				)}
 				<div className="mb-3">
-					Creator: {creator.firstName} {creator.lastName} (
+					Looja: {creator.firstName} {creator.lastName} (
 					<Link
 						href="#"
 						onClick={() =>

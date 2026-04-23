@@ -18,8 +18,6 @@ export class InvitationService extends BaseEntityService<
 				this.basePath + `/group/${groupId}`,
 			);
 
-			console.log("allAsyncByGroupId response", response);
-
 			if (response.status <= 300) {
 				return {
 					statusCode: response.status,
@@ -38,7 +36,6 @@ export class InvitationService extends BaseEntityService<
 				],
 			};
 		} catch (error) {
-			console.log("error: ", (error as AxiosError).message);
 			return {
 				statusCode: (error as AxiosError).status ?? 0,
 				errors: [(error as AxiosError).code ?? "???"],
@@ -70,7 +67,6 @@ export class InvitationService extends BaseEntityService<
 				],
 			};
 		} catch (error) {
-			console.log("error: ", (error as AxiosError).message);
 			return {
 				statusCode: (error as AxiosError).status ?? 0,
 				errors: [(error as AxiosError).code ?? "???"],
@@ -102,7 +98,6 @@ export class InvitationService extends BaseEntityService<
 				],
 			};
 		} catch (error) {
-			console.log("error: ", (error as AxiosError).message);
 			return {
 				statusCode: (error as AxiosError).status ?? 0,
 				errors: [(error as AxiosError).code ?? "???"],

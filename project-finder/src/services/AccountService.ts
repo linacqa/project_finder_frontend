@@ -22,8 +22,6 @@ export class AccountService extends BaseService {
 				loginData,
 			);
 
-			console.log("login response", response);
-
 			if (response.status <= 300) {
 				return {
 					statusCode: response.status,

@@ -1,15 +1,26 @@
 "use client";
 import MyProjectCard from "@/components/myProjects/MyProjectCard";
+import { AccountContext } from "@/context/AccountContext";
 import { ApplicationService } from "@/services/ApplicationService";
 import { ProjectService } from "@/services/ProjectService";
 import { IApplication } from "@/types/domain/IApplication";
 import { IProject } from "@/types/domain/IProject";
-import { useEffect, useState } from "react";
-import { ALERT_POSITION_TYPES, ALERT_SIZE, ALERT_STATUS_TYPE, TTNewAlert, TTNewContainer } from "taltech-styleguide";
+import { useRouter } from "next/dist/client/components/navigation";
+import { useContext, useEffect, useState } from "react";
+import {
+	ALERT_POSITION_TYPES,
+	ALERT_SIZE,
+	ALERT_STATUS_TYPE,
+	TTNewAlert,
+	TTNewContainer,
+} from "taltech-styleguide";
 
 export default function MyProjectsPage() {
 	const [projects, setProjects] = useState<IProject[]>([]);
 	const [applications, setApplications] = useState<IApplication[]>([]);
+
+	const { accountInfo } = useContext(AccountContext);
+	const router = useRouter();
 
 	const [message, setMessage] = useState<{
 		type: string;
@@ -18,6 +29,18 @@ export default function MyProjectsPage() {
 
 	const projectService = new ProjectService();
 	const applicationService = new ApplicationService();
+
+	useEffect(() => {
+		// Wait for AppState hydration before deciding auth redirect.
+		if (accountInfo === undefined) {
+			return;
+		}
+
+		if (!accountInfo.jwt) {
+			router.push("/login");
+			return;
+		}
+	}, [accountInfo]);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -116,15 +139,19 @@ export default function MyProjectsPage() {
 						onDeleteApplication={() => {}}
 					/>
 				))}
-				{applications.filter((app) => !projects.find((p) => p.id === app.projectId)).map((application) => (
-					<MyProjectCard
-						key={application.id}
-						application={application}
-						project={null}
-						type="application"
-						onDeleteApplication={deleteApplication}
-					/>
-				))}
+				{applications
+					.filter(
+						(app) => !projects.find((p) => p.id === app.projectId),
+					)
+					.map((application) => (
+						<MyProjectCard
+							key={application.id}
+							application={application}
+							project={null}
+							type="application"
+							onDeleteApplication={deleteApplication}
+						/>
+					))}
 			</div>
 		</TTNewContainer>
 	);

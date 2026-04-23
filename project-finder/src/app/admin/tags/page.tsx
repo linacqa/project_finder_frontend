@@ -1,9 +1,11 @@
 "use client";
 import ConfirmationModal from "@/components/modal/ConfirmationModal";
 import TagCard from "@/components/tags/TagCard";
+import { AccountContext } from "@/context/AccountContext";
 import { TagService } from "@/services/TagService";
 import { ITag } from "@/types/domain/ITag";
-import { useEffect, useState } from "react";
+import { useRouter } from "next/dist/client/components/navigation";
+import { useContext, useEffect, useState } from "react";
 import {
 	ALERT_POSITION_TYPES,
 	ALERT_SIZE,
@@ -23,10 +25,29 @@ export default function Tags() {
 	const tagService = new TagService();
 	const [newTagName, setNewTagName] = useState("");
 
+	const { accountInfo } = useContext(AccountContext);
+	const router = useRouter();
+
 	const [message, setMessage] = useState<{
 		type: string;
 		text: string;
 	} | null>(null);
+
+	useEffect(() => {
+		// Wait for AppState hydration before deciding auth redirect.
+		if (accountInfo === undefined) {
+			return;
+		}
+
+		if (!accountInfo.jwt) {
+			router.push("/login");
+			return;
+		}
+		if (accountInfo.role !== "admin") {
+			router.push("/");
+			return;
+		}
+	}, [accountInfo]);
 
 	useEffect(() => {
 		setMessage({ type: "loading", text: "Laadin silte..." });
@@ -50,7 +71,7 @@ export default function Tags() {
 			return;
 		}
 		setMessage({ type: "loading", text: "Lisan silti..." });
-		tagService.addAsync({ name }).then((res) => {
+		tagService.addAsync({ name: name.trim() }).then((res) => {
 			if (res && res.data) {
 				setTags((prevTags) => [...prevTags, res.data as ITag]);
 				setNewTagName("");
@@ -67,11 +88,11 @@ export default function Tags() {
 
 	const handleSaveTag = (id: string, newName: string) => {
 		setMessage({ type: "loading", text: "Salvestan sildi muudatusi..." });
-		tagService.updateAsync({ id: id, name: newName }).then((res) => {
+		tagService.updateAsync({ id: id, name: newName.trim() }).then((res) => {
 			if (res && res.statusCode && res.statusCode <= 300) {
 				setTags((prevTags) =>
 					prevTags.map((tag) =>
-						tag.id === id ? { ...tag, name: newName } : tag,
+						tag.id === id ? { ...tag, name: newName.trim() } : tag,
 					),
 				);
 				setMessage({ type: "success", text: "Silt uuendatud." });

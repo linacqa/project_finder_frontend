@@ -13,8 +13,6 @@ export class ApplicationService extends BaseEntityService<IApplication, IApplica
 		try {
 			const response = await this.axiosInstance.get<IApplication[]>(this.basePath + '/my')
 
-			console.log('getAll for current user response', response)
-
 			if (response.status <= 300) {
 				return {
 					statusCode: response.status,
@@ -27,7 +25,6 @@ export class ApplicationService extends BaseEntityService<IApplication, IApplica
 				errors: [(response.status.toString() + ' ' + response.statusText).trim()],
 			}
 		} catch (error) {
-			console.log('error: ', (error as AxiosError).message)
 			return {
 				statusCode: (error as AxiosError).status ?? 0,
 				errors: [(error as AxiosError).code ?? "???"],
@@ -41,8 +38,6 @@ export class ApplicationService extends BaseEntityService<IApplication, IApplica
 					`${this.basePath}/my/${projectId}`,
 				)
 
-				console.log('getCurrentUsersApplicationByProjectIdAsync response', response)
-
 				if (response.status <= 300) {
 					return {
 						statusCode: response.status,
@@ -55,7 +50,6 @@ export class ApplicationService extends BaseEntityService<IApplication, IApplica
 					errors: [(response.status.toString() + ' ' + response.statusText).trim()],
 				}
 			} catch (error) {
-				console.log('error: ', (error as AxiosError).message)
 				return {
 					statusCode: (error as AxiosError).status ?? 0,
 					errors: [(error as AxiosError).code ?? "???"],
@@ -79,7 +73,6 @@ export class ApplicationService extends BaseEntityService<IApplication, IApplica
 				errors: [(response.status.toString() + ' ' + response.statusText).trim()],
 			}
 		} catch (error) {
-			console.log('error: ', (error as AxiosError).message)
 			return {
 				statusCode: (error as AxiosError).status ?? 0,
 				errors: [(error as AxiosError).code ?? "???"],
@@ -103,7 +96,6 @@ export class ApplicationService extends BaseEntityService<IApplication, IApplica
 				errors: [(response.status.toString() + ' ' + response.statusText).trim()],
 			}
 		} catch (error) {
-			console.log('error: ', (error as AxiosError).message)
 			return {
 				statusCode: (error as AxiosError).status ?? 0,
 				errors: [(error as AxiosError).code ?? "???"],

@@ -17,8 +17,6 @@ export class GroupService extends BaseEntityService<IGroup, IGroupAdd> {
 				this.basePath + "/matchingProjectTeamSize/" + projectId,
 			);
 
-			console.log("getAllMatchingProjectTeamSize response", response);
-
 			if (response.status <= 300) {
 				return {
 					statusCode: response.status,
@@ -37,7 +35,6 @@ export class GroupService extends BaseEntityService<IGroup, IGroupAdd> {
 				],
 			};
 		} catch (error) {
-			console.log("error: ", (error as AxiosError).message);
 			return {
 				statusCode: (error as AxiosError).status ?? 0,
 				errors: [(error as AxiosError).code ?? "???"],
@@ -50,8 +47,6 @@ export class GroupService extends BaseEntityService<IGroup, IGroupAdd> {
 			const response = await this.axiosInstance.delete<void>(
 				this.basePath + `/member/${memberId}`,
 			);
-
-			console.log("deleteMemberByIdAsync response", response);
 
 			if (response.status <= 300) {
 				return {
@@ -70,7 +65,6 @@ export class GroupService extends BaseEntityService<IGroup, IGroupAdd> {
 				],
 			};
 		} catch (error) {
-			console.log("error: ", (error as AxiosError).message);
 			return {
 				statusCode: (error as AxiosError).status ?? 0,
 				errors: [(error as AxiosError).code ?? "???"],

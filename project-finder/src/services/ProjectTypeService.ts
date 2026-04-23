@@ -10,8 +10,6 @@ export class ProjectTypeService extends BaseService {
 			const response =
 				await this.axiosInstance.get<IProjectType[]>(url);
 
-			console.log("getAll response", response);
-
 			if (response.status <= 300) {
 				return {
 					statusCode: response.status,
@@ -30,7 +28,6 @@ export class ProjectTypeService extends BaseService {
 				],
 			};
 		} catch (error) {
-			console.log("error: ", (error as AxiosError).message);
 			return {
 				statusCode: (error as AxiosError).status ?? 0,
 				errors: [(error as AxiosError).code ?? "???"],

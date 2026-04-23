@@ -12,8 +12,6 @@ export abstract class BaseEntityService<TEntity extends IDomainId, TAddEntity> e
 		try {
 			const response = await this.axiosInstance.get<TEntity[]>(this.basePath)
 
-			console.log('getAll response', response)
-
 			if (response.status <= 300) {
 				return {
 					statusCode: response.status,
@@ -26,7 +24,6 @@ export abstract class BaseEntityService<TEntity extends IDomainId, TAddEntity> e
 				errors: [(response.status.toString() + ' ' + response.statusText).trim()],
 			}
 		} catch (error) {
-			console.log('error: ', (error as AxiosError).message)
 			return {
 				statusCode: (error as AxiosError).status ?? 0,
 				errors: [(error as AxiosError).code ?? "???"],
@@ -50,7 +47,6 @@ export abstract class BaseEntityService<TEntity extends IDomainId, TAddEntity> e
 				errors: [(response.status.toString() + ' ' + response.statusText).trim()],
 			}
 		} catch (error) {
-			console.log('error: ', (error as AxiosError).message)
 			return {
 				statusCode: (error as AxiosError).status ?? 0,
 				errors: [(error as AxiosError).code ?? "???"],
@@ -76,7 +72,6 @@ export abstract class BaseEntityService<TEntity extends IDomainId, TAddEntity> e
 				errors: [(response.status.toString() + ' ' + response.statusText).trim()],
 			}
 		} catch (error) {
-			console.log('error: ', (error as AxiosError).message)
 			return {
 				statusCode: (error as AxiosError).status ?? 0,
 				errors: [(error as AxiosError).code ?? "???"],
@@ -102,7 +97,6 @@ export abstract class BaseEntityService<TEntity extends IDomainId, TAddEntity> e
 				errors: [(response.status.toString() + ' ' + response.statusText).trim()],
 			}
 		} catch (error) {
-			console.log('error: ', (error as AxiosError).message)
 			return {
 				statusCode: (error as AxiosError).status ?? 0,
 				errors: [(error as AxiosError).code ?? "???"],
@@ -126,7 +120,6 @@ export abstract class BaseEntityService<TEntity extends IDomainId, TAddEntity> e
 				errors: [(response.status.toString() + ' ' + response.statusText).trim()],
 			}
 		} catch (error) {
-			console.log('error: ', (error as AxiosError).message)
 			return {
 				statusCode: (error as AxiosError).status ?? 0,
 				errors: [(error as AxiosError).code ?? "???"],

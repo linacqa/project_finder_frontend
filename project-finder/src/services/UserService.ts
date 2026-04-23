@@ -12,8 +12,6 @@ export class UserService extends BaseService {
 			const response =
 				await this.axiosInstance.get<IUserInfo[]>(url);
 
-			console.log("getAll response", response);
-
 			if (response.status <= 300) {
 				return {
 					statusCode: response.status,
@@ -32,7 +30,6 @@ export class UserService extends BaseService {
 				],
 			};
 		} catch (error) {
-			console.log("error: ", (error as AxiosError).message);
 			return {
 				statusCode: (error as AxiosError).status ?? 0,
 				errors: [(error as AxiosError).code ?? "???"],
@@ -46,8 +43,6 @@ export class UserService extends BaseService {
 			const response =
 				await this.axiosInstance.get<ISupervisorInfo[]>(url);
 
-			console.log("getAllSupervisors response", response);
-
 			if (response.status <= 300) {
 				return {
 					statusCode: response.status,
@@ -66,7 +61,6 @@ export class UserService extends BaseService {
 				],
 			};
 		} catch (error) {
-			console.log("error: ", (error as AxiosError).message);
 			return {
 				statusCode: (error as AxiosError).status ?? 0,
 				errors: [(error as AxiosError).code ?? "???"],
@@ -80,8 +74,6 @@ export class UserService extends BaseService {
 			const response =
 				await this.axiosInstance.get<IStudentInfo[]>(url);
 
-			console.log("getAllStudents response", response);
-
 			if (response.status <= 300) {
 				return {
 					statusCode: response.status,
@@ -100,7 +92,6 @@ export class UserService extends BaseService {
 				],
 			};
 		} catch (error) {
-			console.log("error: ", (error as AxiosError).message);
 			return {
 				statusCode: (error as AxiosError).status ?? 0,
 				errors: [(error as AxiosError).code ?? "???"],
@@ -124,8 +115,6 @@ export class UserService extends BaseService {
 				}
 			);
 
-			console.log("changeUsersRole response", response);
-
 			if (response.status <= 300) {
 				return {
 					statusCode: response.status,
@@ -144,7 +133,6 @@ export class UserService extends BaseService {
 				],
 			};
 		} catch (error) {
-			console.log("error: ", (error as AxiosError).message);
 			return {
 				statusCode: (error as AxiosError).status ?? 0,
 				errors: [(error as AxiosError).code ?? "???"],
@@ -162,8 +150,6 @@ export class UserService extends BaseService {
 					body: message,
 				}
 			);
-
-			console.log("emailAdminsAsync response", response);
 
 			if (response.status <= 300) {
 				return {
@@ -183,7 +169,6 @@ export class UserService extends BaseService {
 				],
 			};
 		} catch (error) {
-			console.log("error: ", (error as AxiosError).message);
 			return {
 				statusCode: (error as AxiosError).status ?? 0,
 				errors: [(error as AxiosError).code ?? "???"],

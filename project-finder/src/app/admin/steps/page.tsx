@@ -1,9 +1,11 @@
 "use client";
 import ConfirmationModal from "@/components/modal/ConfirmationModal";
 import StepCard from "@/components/steps/StepCard";
+import { AccountContext } from "@/context/AccountContext";
 import { StepService } from "@/services/StepService";
 import { IStep } from "@/types/domain/IStep";
-import { useEffect, useState } from "react";
+import { useRouter } from "next/dist/client/components/navigation";
+import { useContext, useEffect, useState } from "react";
 import {
 	ALERT_POSITION_TYPES,
 	ALERT_SIZE,
@@ -23,10 +25,29 @@ export default function Steps() {
 	const stepService = new StepService();
 	const [newStepName, setNewStepName] = useState("");
 
+	const { accountInfo } = useContext(AccountContext);
+	const router = useRouter();
+
 	const [message, setMessage] = useState<{
 		type: string;
 		text: string;
 	} | null>(null);
+
+	useEffect(() => {
+		// Wait for AppState hydration before deciding auth redirect.
+		if (accountInfo === undefined) {
+			return;
+		}
+
+		if (!accountInfo.jwt) {
+			router.push("/login");
+			return;
+		}
+		if (accountInfo.role !== "admin") {
+			router.push("/");
+			return;
+		}
+	}, [accountInfo]);
 
 	useEffect(() => {
 		setMessage({ type: "loading", text: "Laadin etappe..." });
@@ -50,7 +71,7 @@ export default function Steps() {
 			return;
 		}
 		setMessage({ type: "loading", text: "Lisan etappi..." });
-		stepService.addAsync({ name }).then((res) => {
+		stepService.addAsync({ name: name.trim() }).then((res) => {
 			if (res && res.data) {
 				setSteps((prevSteps) => [...prevSteps, res.data as IStep]);
 				setNewStepName("");

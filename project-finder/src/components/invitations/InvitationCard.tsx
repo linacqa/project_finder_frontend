@@ -1,5 +1,6 @@
 import { IInvitation } from "@/types/domain/IInvitation";
 import {
+	ButtonGroup,
 	Heading,
 	STATUS_TYPE,
 	StatusTag,
@@ -30,15 +31,19 @@ export default function InvitationCard({
 					{invite.group.name}
 				</Heading>
 				<p>
-					Saatja: {invite.fromUser.firstName} {invite.fromUser.lastName} (
-					{invite.fromUser.email})
+					Saatja: {invite.fromUser.firstName}{" "}
+					{invite.fromUser.lastName} ({invite.fromUser.email})
 				</p>
 				{invite.group.users && invite.group.users.length > 0 && (
 					<div className="mt-3 mb-3">
 						<p>Grupi liikmed:</p>
 						{invite.group.users.map((usergroup) => (
-							<StatusTag key={usergroup.id} type={STATUS_TYPE.INFO}>
-								{usergroup.user.firstName} {usergroup.user.lastName} (
+							<StatusTag
+								key={usergroup.id}
+								type={STATUS_TYPE.INFO}
+							>
+								{usergroup.user.firstName}{" "}
+								{usergroup.user.lastName} (
 								{usergroup.user.email}) - {usergroup.role}
 							</StatusTag>
 						))}
@@ -47,28 +52,34 @@ export default function InvitationCard({
 				<p>Teie roll: {invite.role}</p>
 				{!invite.acceptedAt && !invite.declinedAt && (
 					<div className="mt-3">
-						<TTNewButton
-							className="mr-4"
-							variant="primary"
-							size="sm"
-							onClick={() => onAccept(invite.id)}
-						>
-							Aktsepteeri
-						</TTNewButton>
-						<TTNewButton
-							variant="danger"
-							size="sm"
-							onClick={() => onDecline(invite.id)}
-						>
-							Lükka tagasi
-						</TTNewButton>
+						<ButtonGroup>
+							<TTNewButton
+								className="mr-4"
+								variant="primary"
+								size="sm"
+								onClick={() => onAccept(invite.id)}
+							>
+								Aktsepteeri
+							</TTNewButton>
+							<TTNewButton
+								variant="danger"
+								size="sm"
+								onClick={() => onDecline(invite.id)}
+							>
+								Lükka tagasi
+							</TTNewButton>
+						</ButtonGroup>
 					</div>
 				)}
 				{invite.acceptedAt && (
-					<p className="mt-3">Kutse vastu võetud {formatDateTime(invite.acceptedAt)}</p>
+					<p className="mt-3">
+						Kutse vastu võetud {formatDateTime(invite.acceptedAt)}
+					</p>
 				)}
 				{invite.declinedAt && (
-					<p className="mt-3">Kutse tagasi lükatud {formatDateTime(invite.declinedAt)}</p>
+					<p className="mt-3">
+						Kutse tagasi lükatud {formatDateTime(invite.declinedAt)}
+					</p>
 				)}
 			</TTNewCardContent>
 		</TTNewCard>

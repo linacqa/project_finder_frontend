@@ -1,7 +1,9 @@
 "use client";
+import { AccountContext } from "@/context/AccountContext";
 import { UserService } from "@/services/UserService";
 import { IUserInfo } from "@/types/IUserInfo";
-import { useEffect, useState } from "react";
+import { useRouter } from "next/dist/client/components/navigation";
+import { useContext, useEffect, useState } from "react";
 import { TTNewButton, TTNewContainer, TTNewSelect } from "taltech-styleguide";
 
 export default function Users() {
@@ -11,6 +13,9 @@ export default function Users() {
 	);
 	const [newRole, setNewRole] = useState<string>("");
 	const userService = new UserService();
+
+	const { accountInfo } = useContext(AccountContext);
+	const router = useRouter();
 
 	const updateUserRole = async () => {
 		if (!selectedUser || !newRole || newRole === selectedUser.role) {
@@ -38,6 +43,22 @@ export default function Users() {
 			return;
 		}
 	};
+
+	useEffect(() => {
+		// Wait for AppState hydration before deciding auth redirect.
+		if (accountInfo === undefined) {
+			return;
+		}
+
+		if (!accountInfo.jwt) {
+			router.push("/login");
+			return;
+		}
+		if (accountInfo.role !== "admin") {
+			router.push("/");
+			return;
+		}
+	}, [accountInfo]);
 
 	useEffect(() => {
 		const loadUsers = async () => {

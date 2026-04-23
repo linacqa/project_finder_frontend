@@ -1,8 +1,10 @@
 "use client";
 import ApplicationCard from "@/components/applications/ApplicationCard";
+import { AccountContext } from "@/context/AccountContext";
 import { ApplicationService } from "@/services/ApplicationService";
 import { IApplication } from "@/types/domain/IApplication";
-import { useEffect, useState } from "react";
+import { useRouter } from "next/dist/client/components/navigation";
+import { useContext, useEffect, useState } from "react";
 import {
 	ALERT_POSITION_TYPES,
 	ALERT_SIZE,
@@ -15,10 +17,29 @@ export default function ApplicationsPage() {
 	const [applications, setApplications] = useState<IApplication[]>([]);
 	const applicationService = new ApplicationService();
 
+	const { accountInfo } = useContext(AccountContext);
+	const router = useRouter();
+
 	const [message, setMessage] = useState<{
 		type: string;
 		text: string;
 	} | null>(null);
+
+	useEffect(() => {
+		// Wait for AppState hydration before deciding auth redirect.
+		if (accountInfo === undefined) {
+			return;
+		}
+
+		if (!accountInfo.jwt) {
+			router.push("/login");
+			return;
+		}
+		if (accountInfo.role !== "admin") {
+			router.push("/");
+			return;
+		}
+	}, [accountInfo]);
 
 	useEffect(() => {
 		setMessage({ type: "loading", text: "Laadin taotlusi..." });
@@ -37,14 +58,15 @@ export default function ApplicationsPage() {
 	}, []);
 
 	const handleAccept = async (id: string) => {
-		setMessage({ type: "loading", text: "Kinnitan taotlust..." });
+		setMessage({ type: "loading", text: "Kinnitan kandideerimist..." });
 		const res = await applicationService.acceptByIdAsync(id);
 		console.log(res);
 
 		if (res && res.statusCode && res.statusCode <= 300) {
-			// TODO
-			console.log("Application accepted successfully", res.data);
-			setMessage({ type: "success", text: "Kandideerimine vastu võetud!" });
+			setMessage({
+				type: "success",
+				text: "Kandideerimine vastu võetud!",
+			});
 			return;
 		}
 
@@ -55,13 +77,14 @@ export default function ApplicationsPage() {
 	};
 
 	const handleDecline = async (id: string) => {
-		setMessage({ type: "loading", text: "Keeldun taotlusest..." });
+		setMessage({ type: "loading", text: "Lükan kandideerimise tagasi..." });
 		const res = await applicationService.declineByIdAsync(id);
 
 		if (res && res.statusCode && res.statusCode <= 300) {
-			// TODO
-			console.log("Application declined successfully", res.data);
-			setMessage({ type: "success", text: "Kandideerimine tagasi lükatud!" });
+			setMessage({
+				type: "success",
+				text: "Kandideerimine tagasi lükatud!",
+			});
 			return;
 		}
 

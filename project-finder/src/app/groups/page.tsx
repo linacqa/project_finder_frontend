@@ -1,9 +1,11 @@
 "use client";
 
 import GroupCard from "@/components/groups/GroupCard";
+import { AccountContext } from "@/context/AccountContext";
 import { GroupService } from "@/services/GroupService";
 import { IGroup } from "@/types/domain/IGroup";
-import { useEffect, useState } from "react";
+import { useRouter } from "next/dist/client/components/navigation";
+import { useContext, useEffect, useState } from "react";
 import {
 	ALERT_POSITION_TYPES,
 	ALERT_SIZE,
@@ -24,12 +26,31 @@ export default function Groups() {
 	const [newGroupName, setNewGroupName] = useState("");
 	const [roleInGroup, setRoleInGroup] = useState("");
 
+	const { accountInfo } = useContext(AccountContext);
+	const router = useRouter();
+
 	const [message, setMessage] = useState<{
 		type: string;
 		text: string;
 	} | null>(null);
 
 	const groupService = new GroupService();
+
+	useEffect(() => {
+		// Wait for AppState hydration before deciding auth redirect.
+		if (accountInfo === undefined) {
+			return;
+		}
+
+		if (!accountInfo.jwt) {
+			router.push("/login");
+			return;
+		}
+		if (accountInfo.role !== "student" && accountInfo.role !== "admin") {
+			router.push("/");
+			return;
+		}
+	}, [accountInfo]);
 
 	useEffect(() => {
 		setMessage({ type: "loading", text: "Laadin gruppe..." });
@@ -48,9 +69,17 @@ export default function Groups() {
 	}, []);
 
 	const handleCreateGroup = (name: string, role: string) => {
-		setMessage({ type: "loading", text: "Loome gruppi..." });
+		if (!name.trim()) {
+			setMessage({ type: "error", text: "Grupinimi ei saa olla tühi." });
+			return;
+		}
+		if (!role.trim()) {
+			setMessage({ type: "error", text: "Palun määra oma roll grupis." });
+			return;
+		}
+		setMessage({ type: "loading", text: "Loon gruppi..." });
 		groupService
-			.addAsync({ name, creatorRoleInGroup: role })
+			.addAsync({ name: name.trim(), creatorRoleInGroup: role })
 			.then((res) => {
 				if (res && res.data) {
 					groupService.getAllAsync().then((res) => {
@@ -98,7 +127,7 @@ export default function Groups() {
 					></TTNewAlert>
 				</div>
 			)}
-			<h1>Groups</h1>
+			<h1>Grupid</h1>
 
 			<div className="group-list-container">
 				<TTNewCard className="mb-4 w-auto">

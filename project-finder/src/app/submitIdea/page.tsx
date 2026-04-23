@@ -18,6 +18,7 @@ import { FormGroup, FormLabel } from "react-bootstrap";
 import { TagService } from "@/services/TagService";
 import { UserService } from "@/services/UserService";
 import { AccountContext } from "@/context/AccountContext";
+import { useRouter } from "next/dist/client/components/navigation";
 
 export default function SubmitIdea() {
 	const [tagOptions, setTagOptions] = useState<{ label: string }[]>([]);
@@ -26,6 +27,7 @@ export default function SubmitIdea() {
 	>([]);
 
 	const { accountInfo } = useContext(AccountContext);
+	const router = useRouter();
 
 	const [message, setMessage] = useState<{
 		type: string;
@@ -50,6 +52,18 @@ export default function SubmitIdea() {
 		supervisors: [] as string[],
 		wantsToSuperviseOrWrite: "no",
 	});
+
+	useEffect(() => {
+		// Wait for AppState hydration before deciding auth redirect.
+		if (accountInfo === undefined) {
+			return;
+		}
+
+		if (!accountInfo.jwt) {
+			router.push("/login");
+			return;
+		}
+	}, [accountInfo]);
 
 	useEffect(() => {
 		let mounted = true;
@@ -133,6 +147,56 @@ export default function SubmitIdea() {
 	};
 
 	const handleSendEmail = async () => {
+		if (formData.titleInEstonian.trim() === "" && formData.titleInEnglish.trim() === "") {
+			setMessage({
+				type: "error",
+				text: "Pealkiri vähemalt ühes keeles on kohustuslik.",
+			});
+			return;
+		}
+		if (formData.description.trim() === "") {
+			setMessage({
+				type: "error",
+				text: "Kirjeldus on kohustuslik.",
+			});
+			return;
+		}
+		if (formData.objective.trim() === "") {
+			setMessage({
+				type: "error",
+				text: "Eesmärk on kohustuslik.",
+			});
+			return;
+		}
+		if (formData.problem.trim() === "") {
+			setMessage({
+				type: "error",
+				text: "Probleem on kohustuslik.",
+			});
+			return;
+		}
+		if (formData.background.trim() === "") {
+			setMessage({
+				type: "error",
+				text: "Taust on kohustuslik.",
+			});
+			return;
+		}
+		if (formData.teamSizeMin < 1 || formData.teamSizeMax < 1) {
+			setMessage({
+				type: "error",
+				text: "Meeskonna suurus peab olema positiivne arv.",
+			});
+			return;
+		}
+		if (formData.type.trim() === "") {
+			setMessage({
+				type: "error",
+				text: "Projekti tüüp on kohustuslik.",
+			});
+			return;
+		}
+
 		const emailContent = `
 <!DOCTYPE html>
 <html>
@@ -171,19 +235,31 @@ export default function SubmitIdea() {
 		</div>
 		<div class="field">
 			<div class="label">Kirjeldus:</div>
-			<div class="value">${formData.description.split('\n').map(line => `<div>${line}</div>`).join('')}</div>
+			<div class="value">${formData.description
+				.split("\n")
+				.map((line) => `<div>${line}</div>`)
+				.join("")}</div>
 		</div>
 		<div class="field">
 			<div class="label">Eesmärk:</div>
-			<div class="value">${formData.objective.split('\n').map(line => `<div>${line}</div>`).join('')}</div>
+			<div class="value">${formData.objective
+				.split("\n")
+				.map((line) => `<div>${line}</div>`)
+				.join("")}</div>
 		</div>
 		<div class="field">
 			<div class="label">Probleem:</div>
-			<div class="value">${formData.problem.split('\n').map(line => `<div>${line}</div>`).join('')}</div>
+			<div class="value">${formData.problem
+				.split("\n")
+				.map((line) => `<div>${line}</div>`)
+				.join("")}</div>
 		</div>
 		<div class="field">
 			<div class="label">Taust:</div>
-			<div class="value">${formData.background.split('\n').map(line => `<div>${line}</div>`).join('')}</div>
+			<div class="value">${formData.background
+				.split("\n")
+				.map((line) => `<div>${line}</div>`)
+				.join("")}</div>
 		</div>
 		<div class="field">
 			<div class="label">Meeskonna minimaalne suurus:</div>
@@ -195,7 +271,10 @@ export default function SubmitIdea() {
 		</div>
 		<div class="field">
 			<div class="label">Kommentaar:</div>
-			<div class="value">${formData.comment.split('\n').map(line => `<div>${line}</div>`).join('')}</div>
+			<div class="value">${formData.comment
+				.split("\n")
+				.map((line) => `<div>${line}</div>`)
+				.join("")}</div>
 		</div>
 		<div class="field">
 			<div class="label">Soovituslikud juhendajad:</div>
@@ -210,7 +289,10 @@ export default function SubmitIdea() {
 </html>
 `;
 		try {
-			var res = await userService.emailAdminsAsync("Uus projekti idee", emailContent);
+			var res = await userService.emailAdminsAsync(
+				"Uus projekti idee",
+				emailContent,
+			);
 			if (res.statusCode && res.statusCode < 300) {
 				setMessage({
 					type: "success",
@@ -260,8 +342,6 @@ export default function SubmitIdea() {
 					<form
 						onSubmit={(e) => {
 							e.preventDefault();
-							console.log(formData);
-							// TODO: send data to email
 							handleSendEmail();
 						}}
 					>
@@ -579,7 +659,7 @@ export default function SubmitIdea() {
 									marginBottom: "4px",
 								}}
 							>
-								Esimene on põhiuhendaja, teine on kaasjuhendaja
+								Esimene on põhijuhendaja, teine on kaasjuhendaja
 							</div>
 							<Typeahead
 								clearButton

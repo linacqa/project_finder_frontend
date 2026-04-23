@@ -18,11 +18,6 @@ export default function Header() {
 
 	const handleLogout = (e: React.MouseEvent) => {
 		e.preventDefault();
-		// localStorage.removeItem("_jwt");
-		// localStorage.removeItem("_refreshToken");
-		// localStorage.removeItem("_firstName");
-		// localStorage.removeItem("_lastName");
-		// localStorage.removeItem("_role");
 		setAccountInfo!({});
 		router.push("/login");
 	};
@@ -35,12 +30,11 @@ export default function Header() {
 						active: true,
 						children: "Projektide süsteem",
 						items: [
-							// { children: "Home", href: "/" },
 							...(accountInfo?.jwt
 								? [
 										{
 											children:
-												"Deklareeri uus projekti idee",
+												"Esita uus projekti idee",
 											href: "/submitIdea",
 										},
 									]

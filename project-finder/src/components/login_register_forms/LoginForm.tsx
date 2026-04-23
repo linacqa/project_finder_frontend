@@ -31,6 +31,7 @@ export default function LoginForm() {
 		password: string;
 	};
 
+	// TODO: change default values to empty strings before production
 	const {
 		register,
 		handleSubmit,
@@ -43,6 +44,10 @@ export default function LoginForm() {
 	});
 
 	const onSubmit: SubmitHandler<Inputs> = async (data: Inputs) => {
+		if (data.email === "" || data.password === "") {
+			setMessage({ type: "error", text: "Palun täida kõik väljad!" });
+			return;
+		}
 		setMessage({ type: "loading", text: "Laadin..." });
 
 		try {
@@ -50,7 +55,6 @@ export default function LoginForm() {
 				data.email,
 				data.password,
 			);
-			console.log(result);
 			if (result.errors) {
 				setMessage({
 					type: "error",

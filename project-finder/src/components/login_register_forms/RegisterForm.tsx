@@ -1,11 +1,19 @@
 "use client";
 
-import { AccountContext } from "@/context/AccountContext";
+import { AccountContext, IAccountInfo } from "@/context/AccountContext";
 import { AccountService } from "@/services/AccountService";
 import { useRouter } from "next/navigation";
 import { useContext, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { ALERT_POSITION_TYPES, ALERT_SIZE, ALERT_STATUS_TYPE, ButtonGroup, CustomInput, TTNewAlert, TTNewButton } from "taltech-styleguide";
+import {
+	ALERT_POSITION_TYPES,
+	ALERT_SIZE,
+	ALERT_STATUS_TYPE,
+	ButtonGroup,
+	CustomInput,
+	TTNewAlert,
+	TTNewButton,
+} from "taltech-styleguide";
 
 export default function RegisterForm() {
 	const accountService = new AccountService();
@@ -39,6 +47,7 @@ export default function RegisterForm() {
 		program?: string;
 	};
 
+	// TODO: change default values to empty strings before production
 	const {
 		register,
 		handleSubmit,
@@ -60,6 +69,40 @@ export default function RegisterForm() {
 	const onSubmit: SubmitHandler<Inputs> = async (data: Inputs) => {
 		setMessage({ type: "loading", text: "Laadin..." });
 
+		if (
+			data.email.trim() === "" ||
+			data.firstName.trim() === "" ||
+			data.lastName.trim() === "" ||
+			data.password.trim() === "" ||
+			data.confirmPassword.trim() === ""
+		) {
+			setMessage({
+				type: "error",
+				text: "Palun täida kõik kohustuslikud väljad!",
+			});
+			return;
+		}
+		if (data.role === "student" || data.role === "teacher") {
+			if (data.uniId?.trim() === "") {
+				setMessage({
+					type: "error",
+					text: "Palun täida kõik kohustuslikud väljad!",
+				});
+				return;
+			}
+		}
+		if (data.role === "student") {
+			if (
+				data.matriculationNumber?.trim() === "" ||
+				data.program?.trim() === ""
+			) {
+				setMessage({
+					type: "error",
+					text: "Palun täida kõik kohustuslikud väljad!",
+				});
+				return;
+			}
+		}
 		if (data.password !== data.confirmPassword) {
 			setMessage({ type: "error", text: "Paroolid ei kattu" });
 			return;
@@ -69,7 +112,7 @@ export default function RegisterForm() {
 			var result = await accountService.registerAsync(
 				data.firstName,
 				data.lastName,
-				data.email,
+				data.email.trim(),
 				data.password,
 				data.role,
 				data.uniId,
@@ -77,26 +120,37 @@ export default function RegisterForm() {
 				data.program,
 				data.phoneNumber,
 			);
-			console.log(result);
 			if (result.errors) {
-				setMessage({ type: "error", text: result.statusCode + " - " + result.errors[0] });
+				setMessage({
+					type: "error",
+					text: result.statusCode + " - " + result.errors[0],
+				});
 				return;
 			}
 
 			setMessage({ type: "success", text: "Registreerimine õnnestus!" });
 
-			setAccountInfo!({
+			var accountInfo: IAccountInfo = {
 				jwt: result.data!.jwt,
 				refreshToken: result.data!.refreshToken,
-				firstName: data.firstName,
-				lastName: data.lastName,
-				role: data.role,
+			};
+			setAccountInfo!(accountInfo);
+			var userInfo = await accountService.getCurrentUserInfoAsync();
+
+			setAccountInfo!({
+				...accountInfo,
+				firstName: userInfo.data!.firstName,
+				lastName: userInfo.data!.lastName,
+				role: userInfo.data!.role,
+				userId: userInfo.data!.id,
+				email: userInfo.data!.email,
 			});
 			router.push("/");
 		} catch (error) {
 			setMessage({
 				type: "error",
-				text: "Registreerimine ebaõnnestus - " + (error as Error).message,
+				text:
+					"Registreerimine ebaõnnestus - " + (error as Error).message,
 			});
 		}
 	};
@@ -132,7 +186,7 @@ export default function RegisterForm() {
 				></div>
 				<div>
 					<label className="field-label" htmlFor="Input_FirstName">
-						Eesnimi
+						Eesnimi*
 					</label>
 					<input
 						className="login-field"
@@ -155,7 +209,7 @@ export default function RegisterForm() {
 				</div>
 				<div>
 					<label className="field-label" htmlFor="Input_LastName">
-						Perekonnanimi
+						Perekonnanimi*
 					</label>
 					<input
 						className="login-field"
@@ -178,7 +232,7 @@ export default function RegisterForm() {
 				</div>
 				<div>
 					<label className="field-label" htmlFor="Input_Email">
-						Email
+						Email*
 					</label>
 					<input
 						className="login-field"
@@ -223,7 +277,7 @@ export default function RegisterForm() {
 				</div>
 				<div>
 					<label className="field-label" htmlFor="Input_Password">
-						Parool
+						Parool*
 					</label>
 					<input
 						className="login-field"
@@ -249,7 +303,7 @@ export default function RegisterForm() {
 						className="field-label"
 						htmlFor="Input_ConfirmPassword"
 					>
-						Kinnita parool
+						Kinnita parool*
 					</label>
 					<input
 						className="login-field"
@@ -306,7 +360,7 @@ export default function RegisterForm() {
 				{roleValue === "student" || roleValue === "teacher" ? (
 					<div>
 						<label htmlFor="uni-id" className="field-label">
-							Uni-ID
+							Uni-ID*
 						</label>
 						<input
 							className="login-field"
@@ -335,7 +389,7 @@ export default function RegisterForm() {
 								htmlFor="matriklinumber"
 								className="field-label"
 							>
-								Matriklinumber
+								Matriklinumber*
 							</label>
 							<input
 								className="login-field"
@@ -359,7 +413,7 @@ export default function RegisterForm() {
 						</div>
 						<div>
 							<label htmlFor="oppekava" className="field-label">
-								Õppekava
+								Õppekava*
 							</label>
 							<select
 								className="login-field"

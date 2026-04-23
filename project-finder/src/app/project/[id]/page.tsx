@@ -27,6 +27,7 @@ import ProjectStepsSection from "@/components/project/ProjectStepsSection";
 import { IStepStatus } from "@/types/domain/IStepStatus";
 import { StepStatusService } from "@/services/StepStatusService";
 import { set } from "react-hook-form";
+import { useRouter } from "next/dist/client/components/navigation";
 
 export default function ProjectDetails({
 	params,
@@ -56,6 +57,7 @@ export default function ProjectDetails({
 	const [stepStatuses, setStepStatuses] = useState<IStepStatus[]>([]);
 
 	const { accountInfo } = useContext(AccountContext);
+	const router = useRouter();
 
 	const projectService = new ProjectService();
 	const applicationService = new ApplicationService();
@@ -63,6 +65,18 @@ export default function ProjectDetails({
 	const projectStepService = new ProjectStepService();
 	const commentService = new CommentService();
 	const stepStatusService = new StepStatusService();
+
+	useEffect(() => {
+		// Wait for AppState hydration before deciding auth redirect.
+		if (accountInfo === undefined) {
+			return;
+		}
+
+		if (!accountInfo.jwt) {
+			router.push("/login");
+			return;
+		}
+	}, [accountInfo]);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -138,7 +152,6 @@ export default function ProjectDetails({
 					});
 				}
 			} catch (error) {
-				console.error("Error fetching project data: ", error);
 				setMessage({
 					type: "error",
 					text: "Projekti andmete laadimine ebaõnnestus.",
@@ -232,11 +245,13 @@ export default function ProjectDetails({
 		try {
 			commentService.deleteByIdAsync(commentId).then((res) => {
 				if (res && res.statusCode && res.statusCode <= 300) {
-					commentService.getAllByProjectIdAsync(projectId).then((commentsRes) => {
-						if (commentsRes?.data) {
-							setComments(commentsRes.data);
-						}
-					});
+					commentService
+						.getAllByProjectIdAsync(projectId)
+						.then((commentsRes) => {
+							if (commentsRes?.data) {
+								setComments(commentsRes.data);
+							}
+						});
 					setMessage({
 						type: "success",
 						text: "Kommentaar kustutatud.",

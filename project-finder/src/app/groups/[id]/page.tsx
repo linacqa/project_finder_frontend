@@ -160,6 +160,22 @@ export default function GroupDetails({
 	};
 
 	useEffect(() => {
+		// Wait for AppState hydration before deciding auth redirect.
+		if (accountInfo === undefined) {
+			return;
+		}
+
+		if (!accountInfo.jwt) {
+			router.push("/login");
+			return;
+		}
+		if (accountInfo.role !== "student" && accountInfo.role !== "admin") {
+			router.push("/");
+			return;
+		}
+	}, [accountInfo]);
+
+	useEffect(() => {
 		let mounted = true;
 		setMessage({ type: "loading", text: "Laadin grupi andmeid..." });
 

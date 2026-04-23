@@ -1,14 +1,10 @@
 "use client";
 import {
-	ButtonGroup,
 	Heading,
-	Input,
-	TTNewButton,
 	TTNewCard,
 	TTNewCardContent,
 } from "taltech-styleguide";
-import ConfirmationModal from "../modal/ConfirmationModal";
-import { useContext, useState } from "react";
+import { useContext } from "react";
 import { IUserInfo } from "@/types/IUserInfo";
 import { IUserGroup } from "@/types/domain/IUserGroup";
 import Link from "next/link";
@@ -25,15 +21,8 @@ export default function GroupCard({
 	creator: IUserInfo;
 	users: IUserGroup[];
 }) {
-	// const [showDeleteModal, setShowDeleteModal] = useState(false);
-	// const [newName, setNewName] = useState(name);
 
-	// const handleDeleteTag = (tagId: string) => {
-	// 	setShowDeleteModal(false);
-	// 	onDelete(tagId);
-	// }
-
-	const { accountInfo, setAccountInfo } = useContext(AccountContext);
+	const { accountInfo } = useContext(AccountContext);
 
 	return (
 		<TTNewCard className="mb-4 w-auto" key={id}>
@@ -72,26 +61,6 @@ export default function GroupCard({
 						({user.user.email}) - {user.role}
 					</div>
 				))}
-				{/* <ButtonGroup>
-					<TTNewButton variant="primary" size="sm" onClick={() => onUpdate(id, newName)}>
-						Save
-					</TTNewButton>
-					<TTNewButton
-						variant="danger"
-						size="sm"
-						onClick={() => setShowDeleteModal(true)}
-					>
-						Delete
-					</TTNewButton>
-				</ButtonGroup> */}
-				{/* <ConfirmationModal
-					show={showDeleteModal}
-					hideAction={() => setShowDeleteModal(false)}
-					title="Kas olete kindel?"
-					text="Kas soovite selle sildi jäädavalt kustutada? Seda toimingut ei saa tagasi võtta."
-					confirmText="Jah, kustuta"
-					confirmAction={() => handleDeleteTag(id)}
-				/> */}
 			</TTNewCardContent>
 		</TTNewCard>
 	);

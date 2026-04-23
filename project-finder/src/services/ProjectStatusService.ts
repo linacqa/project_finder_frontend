@@ -11,8 +11,6 @@ export class ProjectStatusService extends BaseService {
 			const response =
 				await this.axiosInstance.get<IProjectStatus[]>(url);
 
-			console.log("getAll response", response);
-
 			if (response.status <= 300) {
 				return {
 					statusCode: response.status,
@@ -31,7 +29,6 @@ export class ProjectStatusService extends BaseService {
 				],
 			};
 		} catch (error) {
-			console.log("error: ", (error as AxiosError).message);
 			return {
 				statusCode: (error as AxiosError).status ?? 0,
 				errors: [(error as AxiosError).code ?? "???"],

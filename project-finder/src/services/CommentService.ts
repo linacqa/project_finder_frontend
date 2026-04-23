@@ -13,8 +13,6 @@ export class CommentService extends BaseEntityService<IComment, ICommentAdd> {
 			try {
 				const response = await this.axiosInstance.get<IComment[]>(`${this.basePath}/project/${projectId}`)
 
-				console.log('getAllByProjectId response', response)
-
 				if (response.status <= 300) {
 					return {
 						statusCode: response.status,
@@ -27,7 +25,6 @@ export class CommentService extends BaseEntityService<IComment, ICommentAdd> {
 					errors: [(response.status.toString() + ' ' + response.statusText).trim()],
 				}
 			} catch (error) {
-				console.log('error: ', (error as AxiosError).message)
 				return {
 					statusCode: (error as AxiosError).status ?? 0,
 					errors: [(error as AxiosError).code ?? "???"],

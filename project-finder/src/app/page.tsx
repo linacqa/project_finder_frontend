@@ -208,7 +208,6 @@ export default function AllProjects() {
 						placeholder="Otsi projekte..."
 						value={search}
 						onChange={(e) => setSearch(e.target.value)}
-						// todo: reload projects
 					/>
 				</FormGroup>
 			</div>
@@ -273,7 +272,7 @@ export default function AllProjects() {
 				totalNumberOfPages={totalPages}
 				onPageChange={(page) => {
 					setPage(page);
-					void loadProjects(undefined, page + 1);
+					void loadProjects(filters, page + 1);
 				}}
 			></Pagination>
 		</TTNewContainer>

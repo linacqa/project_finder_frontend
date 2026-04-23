@@ -8,7 +8,7 @@ import { StepService } from "@/services/StepService";
 import { ProjectStepService } from "@/services/ProjectStepService";
 import { ProjectService } from "@/services/ProjectService";
 import { IProjectAdd } from "@/types/domain/IProjectAdd";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
 	ALERT_POSITION_TYPES,
 	ALERT_SIZE,
@@ -28,6 +28,7 @@ import {
 import dayjs from "dayjs";
 import { useRouter, useSearchParams } from "next/navigation";
 import ConfirmationModal from "@/components/modal/ConfirmationModal";
+import { AccountContext } from "@/context/AccountContext";
 
 export default function AddProject() {
 	const [project, setProject] = useState<IProjectAdd>({
@@ -88,6 +89,8 @@ export default function AddProject() {
 
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
 
+	const { accountInfo } = useContext(AccountContext);
+
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const projectIdToEdit = searchParams.get("id")?.trim() || null;
@@ -100,6 +103,22 @@ export default function AddProject() {
 	const userService = new UserService();
 	const stepService = new StepService();
 	const projectStepService = new ProjectStepService();
+
+	useEffect(() => {
+		// Wait for AppState hydration before deciding auth redirect.
+		if (accountInfo === undefined) {
+			return;
+		}
+
+		if (!accountInfo.jwt) {
+			router.push("/login");
+			return;
+		}
+		if (accountInfo.role !== "admin"){
+			router.push("/");
+			return;
+		}
+	}, [accountInfo]);
 
 	useEffect(() => {
 		let mounted = true;
@@ -127,7 +146,9 @@ export default function AddProject() {
 						? projectService.getByIdAsync(projectIdToEdit)
 						: Promise.resolve(null),
 					isEditMode && projectIdToEdit
-						? projectStepService.getAllByProjectIdAsync(projectIdToEdit)
+						? projectStepService.getAllByProjectIdAsync(
+								projectIdToEdit,
+							)
 						: Promise.resolve(null),
 				]);
 
@@ -184,9 +205,20 @@ export default function AddProject() {
 				if (isEditMode && projectRes?.data) {
 					const loadedProject = projectRes.data;
 
-					const authorId = loadedProject.users.find((u) => u.userProjectRole.name === "Author")?.userId || "";
-					const primarySupervisorId = loadedProject.users.find((u) => u.userProjectRole.name === "Supervisor")?.userId || null;
-					const externalSupervisorId = loadedProject.users.find((u) => u.userProjectRole.name === "External Supervisor")?.userId || null;
+					const authorId =
+						loadedProject.users.find(
+							(u) => u.userProjectRole.name === "Author",
+						)?.userId || "";
+					const primarySupervisorId =
+						loadedProject.users.find(
+							(u) => u.userProjectRole.name === "Supervisor",
+						)?.userId || null;
+					const externalSupervisorId =
+						loadedProject.users.find(
+							(u) =>
+								u.userProjectRole.name ===
+								"External Supervisor",
+						)?.userId || null;
 
 					setSupervisorIsRegistered(!!primarySupervisorId);
 					setExternalSupervisorIsRegistered(!!externalSupervisorId);
@@ -205,8 +237,8 @@ export default function AddProject() {
 						deadline: loadedProject.deadline ?? null,
 						tagIds: loadedProject.tags?.map((t) => t.id) ?? [],
 						stepIds:
-							projectStepsRes?.data?.map((projectStep) =>
-								projectStep.stepId,
+							projectStepsRes?.data?.map(
+								(projectStep) => projectStep.stepId,
 							) ?? [],
 						primarySupervisorId,
 						primarySupervisor: primarySupervisorId
@@ -225,7 +257,7 @@ export default function AddProject() {
 
 				setMessage({
 					type: "error",
-					text: "Andmete laadimine ebaonnestus.",
+					text: "Andmete laadimine ebaõnnestus.",
 				});
 				console.error(error);
 			}
@@ -282,6 +314,30 @@ export default function AddProject() {
 			return;
 		}
 
+		if (supervisorIsRegistered){
+			setProject((prev) => ({
+				...prev,
+				primarySupervisor: null,
+			}));
+		} else {
+			setProject((prev) => ({
+				...prev,
+				primarySupervisorId: null,
+			}));
+		}
+
+		if (externalSupervisorIsRegistered){
+			setProject((prev) => ({
+				...prev,
+				externalSupervisor: null,
+			}));
+		} else {
+			setProject((prev) => ({
+				...prev,
+				externalSupervisorId: null,
+			}));
+		}
+
 		setMessage({
 			type: "loading",
 			text: isEditMode
@@ -292,10 +348,16 @@ export default function AddProject() {
 		try {
 			const res =
 				isEditMode && projectIdToEdit
-					? await projectService.updateByIdAsync(projectIdToEdit, project)
+					? await projectService.updateByIdAsync(
+							projectIdToEdit,
+							project,
+						)
 					: await projectService.addAsync(project);
 
-			if (res && res.data || (isEditMode && res.statusCode && res.statusCode <= 300)) {
+			if (
+				(res && res.data) ||
+				(isEditMode && res.statusCode && res.statusCode <= 300)
+			) {
 				setMessage({
 					type: "success",
 					text: isEditMode
@@ -332,14 +394,23 @@ export default function AddProject() {
 			const res = await projectService.deleteByIdAsync(projectIdToEdit);
 
 			if (res && res.statusCode && res.statusCode <= 300) {
-				setMessage({ type: "success", text: "Projekt edukalt kustutatud!" });
+				setMessage({
+					type: "success",
+					text: "Projekt edukalt kustutatud!",
+				});
 				router.push("/");
 				return;
 			}
 
-			setMessage({ type: "error", text: "Projekti kustutamine ebaõnnestus." });
+			setMessage({
+				type: "error",
+				text: "Projekti kustutamine ebaõnnestus.",
+			});
 		} catch (error) {
-			setMessage({ type: "error", text: "Projekti kustutamine ebaõnnestus." });
+			setMessage({
+				type: "error",
+				text: "Projekti kustutamine ebaõnnestus.",
+			});
 		}
 	};
 
@@ -483,7 +554,6 @@ export default function AddProject() {
 								>
 									Kirjeldus
 								</Heading>
-								{/* <Divider className="mb-2" /> */}
 
 								<Input
 									as="textarea"
@@ -507,7 +577,6 @@ export default function AddProject() {
 								>
 									Sildid
 								</Heading>
-								{/* <Divider className="mb-2" /> */}
 								<Dropdown className="my-3">
 									<Dropdown.Toggle
 										variant="outline"
@@ -616,7 +685,6 @@ export default function AddProject() {
 								>
 									Juhendajad
 								</Heading>
-								{/* <Divider className="mb-2" /> */}
 								<div className="mb-3">
 									<div>
 										<div className="mb-2">
@@ -661,6 +729,7 @@ export default function AddProject() {
 																				...project,
 																				primarySupervisorId:
 																					supervisor.id,
+																				primarySupervisor: null,
 																			},
 																		);
 																	}}
@@ -757,6 +826,7 @@ export default function AddProject() {
 																				...project,
 																				externalSupervisorId:
 																					externalSupervisor.id,
+																				externalSupervisor: null,
 																			},
 																		);
 																	}}
@@ -808,7 +878,6 @@ export default function AddProject() {
 									</div>
 								</div>
 							</div>
-							{/* </div> */}
 							<div>
 								<Heading
 									className="admin-thesis-details-titles"
@@ -898,7 +967,11 @@ export default function AddProject() {
 									<strong>Tähtaeg:</strong>
 								</div>
 								<DateTimePicker
-									value={project.deadline ? dayjs(project.deadline) : null}
+									value={
+										project.deadline
+											? dayjs(project.deadline)
+											: null
+									}
 									onChange={(date) => {
 										setProject({
 											...project,
@@ -986,7 +1059,7 @@ export default function AddProject() {
 										variant="danger"
 										onClick={() => setShowDeleteModal(true)}
 									>
-										Kustuta teema
+										Kustuta projekt
 									</TTNewButton>
 								</ButtonGroup>
 
@@ -994,7 +1067,7 @@ export default function AddProject() {
 									show={showDeleteModal}
 									hideAction={() => setShowDeleteModal(false)}
 									title="Kas olete kindel?"
-									text="Kas soovite selle lõputöö teema jäädavalt kustutada? Seda toimingut ei saa tagasi võtta."
+									text="Kas soovite selle projekti jäädavalt kustutada? Seda toimingut ei saa tagasi võtta."
 									confirmText="Jah, kustuta"
 									confirmAction={handleDeleteConfirm}
 								/>
@@ -1017,7 +1090,6 @@ export default function AddProject() {
 					</TTNewCardContent>
 				</TTNewCard>
 			</TTNewContainer>
-			{/* </div> */}
 		</>
 	);
 }

@@ -33,7 +33,7 @@ export default function StepCard({ id, name, onDelete, onUpdate }: { id: string;
 					show={showDeleteModal}
 					hideAction={() => setShowDeleteModal(false)}
 					title="Kas olete kindel?"
-					text="Kas soovite selle sammu jäädavalt kustutada? Seda toimingut ei saa tagasi võtta."
+					text="Kas soovite selle etapi jäädavalt kustutada? Seda toimingut ei saa tagasi võtta."
 					confirmText="Jah, kustuta"
 					confirmAction={() => handleDeleteStep(id)}
 				/>

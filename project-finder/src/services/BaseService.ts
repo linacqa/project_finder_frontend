@@ -6,8 +6,6 @@ import { useContext } from "react";
 export abstract class BaseService {
 	protected axiosInstance: AxiosInstance;
 
-	// private setAccountInfo = useContext(AccountContext).setAccountInfo;
-
 	constructor() {
 		this.axiosInstance = axios.create({
 			baseURL: "http://localhost:5231/api/v1.0/",
@@ -58,8 +56,6 @@ export abstract class BaseService {
 							},
 						);
 
-						console.log("renewRefreshToken", response);
-
 						if (response && response.status <= 300) {
 							localStorage.setItem("_jwt", response.data.jwt);
 							localStorage.setItem(
@@ -67,11 +63,6 @@ export abstract class BaseService {
 								response.data.refreshToken,
 							);
 							originalRequest.headers.Authorization = `Bearer ${response.data.jwt}`;
-
-							// this.setAccountInfo!({
-							// 	jwt: response.data.jwt,
-							// 	refreshToken: response.data.refreshToken,
-							// });
 
 							return this.axiosInstance(originalRequest);
 						}

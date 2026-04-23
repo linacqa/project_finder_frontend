@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
 	TTNewContainer,
 	Heading,
@@ -12,9 +12,14 @@ import {
 import { IInvitation } from "@/types/domain/IInvitation";
 import { InvitationService } from "@/services/InvitationService";
 import InvitationCard from "@/components/invitations/InvitationCard";
+import { useRouter } from "next/dist/client/components/navigation";
+import { AccountContext } from "@/context/AccountContext";
 
 export default function MyInvitationsPage() {
 	const [invitations, setInvitations] = useState<IInvitation[]>([]);
+
+	const { accountInfo } = useContext(AccountContext);
+	const router = useRouter();
 
 	const [message, setMessage] = useState<{
 		type: string;
@@ -56,22 +61,36 @@ export default function MyInvitationsPage() {
 	};
 
 	useEffect(() => {
+		// Wait for AppState hydration before deciding auth redirect.
+		if (accountInfo === undefined) {
+			return;
+		}
+
+		if (!accountInfo.jwt) {
+			router.push("/login");
+			return;
+		}
+		if (accountInfo.role !== "student" && accountInfo.role !== "admin") {
+			router.push("/");
+			return;
+		}
+	}, [accountInfo]);
+
+	useEffect(() => {
 		setMessage({ type: "loading", text: "Laadin kutseid..." });
 
-		invitationService
-			.getAllAsync()
-			.then((res) => {
-				if (res.data) {
-					setInvitations(res.data);
-					setMessage(null);
-					return;
-				}
+		invitationService.getAllAsync().then((res) => {
+			if (res.data) {
+				setInvitations(res.data);
+				setMessage(null);
+				return;
+			}
 
-				setMessage({
-					type: "error",
-					text: `${res.statusCode ?? "Error"} - ${res.errors}`,
-				});
+			setMessage({
+				type: "error",
+				text: `${res.statusCode ?? "Error"} - ${res.errors}`,
 			});
+		});
 	}, []);
 
 	return (

@@ -87,12 +87,6 @@ export default function ProjectCard({
 					<p className="text-sm fw-semibold">Tüüp: {type}</p>
 
 					<div className="d-flex gap-2 flex-wrap">
-						{/* <StatusTag
-							className="px-3 lead"
-							type={STATUS_TYPE.LIGHT}
-						>
-							{authorRole}
-						</StatusTag> */}
 						{tags.map((tag, index) => (
 							<StatusTag
 								className="px-3 lead"
@@ -128,21 +122,6 @@ export default function ProjectCard({
 						})}
 					</p>
 				</div>
-
-				{/* <div className="d-flex justify-content-between align-items-end">
-					<p className="text-sm text-gray-500">{deadline}</p>
-					{isAdmin && (
-						<Link href={`/admin/thesis/${id}`}>
-							<TTNewButton
-								icon="settings"
-								size="sm"
-								variant="outline"
-							>
-								Muuda andmeid
-							</TTNewButton>
-						</Link>
-					)}
-				</div> */}
 			</TTNewCardContent>
 		</TTNewCard>
 	);

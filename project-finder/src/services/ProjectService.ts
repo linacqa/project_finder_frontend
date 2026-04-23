@@ -25,8 +25,6 @@ export class ProjectService extends BaseEntityService<IProject, IProjectAdd> {
 		try {
 			const response = await this.axiosInstance.get<IProject[]>(`${this.basePath}/my`)
 
-			console.log('getMyAllAsync response', response)
-
 			if (response.status <= 300) {
 				return {
 					statusCode: response.status,
@@ -39,7 +37,6 @@ export class ProjectService extends BaseEntityService<IProject, IProjectAdd> {
 				errors: [(response.status.toString() + ' ' + response.statusText).trim()],
 			}
 		} catch (error) {
-			console.log('error: ', (error as AxiosError).message)
 			return {
 				statusCode: (error as AxiosError).status ?? 0,
 				errors: [(error as AxiosError).code ?? "???"],

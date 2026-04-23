@@ -1,6 +1,7 @@
 import { IApplication } from "@/types/domain/IApplication";
 import Link from "next/link";
 import {
+	ButtonGroup,
 	Heading,
 	TTNewButton,
 	TTNewCard,
@@ -33,7 +34,7 @@ export default function ApplicationCard({
 				</p>
 				{application.group && (
 					<p>
-						Kandideeritav grupp: {" "}
+						Kandideeritav grupp:{" "}
 						<Link href={`/groups/${application.groupId}`}>
 							{application.group.name}
 						</Link>
@@ -41,21 +42,23 @@ export default function ApplicationCard({
 				)}
 				{!application.acceptedAt && !application.declinedAt && (
 					<div className="mt-3">
-						<TTNewButton
-							className="mr-4"
-							variant="primary"
-							size="sm"
-							onClick={() => handleAccept(application.id)}
-						>
-							Aktsepteeri
-						</TTNewButton>
-						<TTNewButton
-							variant="danger"
-							size="sm"
-							onClick={() => handleDecline(application.id)}
-						>
-							Lükka tagasi
-						</TTNewButton>
+						<ButtonGroup>
+							<TTNewButton
+								className="mr-4"
+								variant="primary"
+								size="sm"
+								onClick={() => handleAccept(application.id)}
+							>
+								Aktsepteeri
+							</TTNewButton>
+							<TTNewButton
+								variant="danger"
+								size="sm"
+								onClick={() => handleDecline(application.id)}
+							>
+								Lükka tagasi
+							</TTNewButton>
+						</ButtonGroup>
 					</div>
 				)}
 				{application.acceptedAt && (

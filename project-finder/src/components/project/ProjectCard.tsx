@@ -41,14 +41,14 @@ export default function ProjectCard({
 	type,
 }: ProjectCardProps) {
 	return (
-		<TTNewCard className="mb-4 w-auto">
-			<TTNewCardContent className="d-flex flex-column h-100">
-				<div className="flex-grow-1">
-					<Link href={`/project/${id}`} passHref>
+		<TTNewCard className="mb-4 project-card">
+			<TTNewCardContent className="d-flex flex-column h-100 project-card-content">
+				<div className="project-card-main">
+					<Link href={`/project/${id}`} passHref className="d-block min-w-0">
 						<Heading
 							as="h3"
 							visual="h5"
-							className="mb-2 font-bold cursor-pointer"
+							className="mb-2 font-bold cursor-pointer project-card-title"
 						>
 							{titleInEstonian}
 						</Heading>
@@ -97,7 +97,9 @@ export default function ProjectCard({
 							</StatusTag>
 						))}
 					</div>
+				</div>
 
+				<div className="project-card-meta">
 					<p className="text-sm text-accent-second mt-2">
 							Lubatud tiimi suurus:{" "}
 							{teamSizeMin === teamSizeMax

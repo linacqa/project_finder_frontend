@@ -212,7 +212,7 @@ export default function AllProjects() {
 				</FormGroup>
 			</div>
 
-			<div className="thesis-list-container">
+			<div className="project-list-container">
 				{projects.map((project) => (
 					<ProjectCard
 						key={project.id}

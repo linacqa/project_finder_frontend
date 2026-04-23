@@ -398,7 +398,7 @@ export default function ProjectDetails({
 						<Heading as="h2" visual="h4" className="mb-2">
 							Kirjeldus
 						</Heading>
-						<p style={{ whiteSpace: "pre-wrap" }}>
+						<p style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere", wordBreak: "break-word", hyphens: "auto" }}>
 							{project?.description}
 						</p>
 					</div>

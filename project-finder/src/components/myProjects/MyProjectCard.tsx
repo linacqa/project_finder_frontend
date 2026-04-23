@@ -36,16 +36,16 @@ export default function MyProjectCard({
 	return type === "application" ? (
 		<TTNewCard key={application?.id} className="mb-4">
 			<TTNewCardContent>
-				<Heading as="h3" visual="h5">
+				<Heading as="h3" visual="h5" className="project-header-title">
 					<Link href={`/project/${application?.projectId}`}>
 						{application?.project?.titleInEstonian}
 					</Link>
 				</Heading>
-				<Heading as="h4" visual="h6">
+				<Heading as="h4" visual="h6" className="project-header-title">
 					{application?.project?.titleInEnglish}
 				</Heading>
 				{application?.group && (
-					<p>
+					<p className="project-header-title">
 						Kandideeritav grupp:{" "}
 						<Link href={`/groups/${application?.groupId}`}>
 							{application?.group.name}
@@ -94,12 +94,12 @@ export default function MyProjectCard({
 	) : (
 		<TTNewCard key={project?.id} className="mb-4">
 			<TTNewCardContent>
-				<Heading as="h3" visual="h5">
+				<Heading as="h3" visual="h5" className="project-header-title">
 					<Link href={`/project/${project?.id}`}>
 						{project?.titleInEstonian}
 					</Link>
 				</Heading>
-				<Heading as="h4" visual="h6">
+				<Heading as="h4" visual="h6" className="project-header-title">
 					{project?.titleInEnglish}
 				</Heading>
 				<p className="mt-3">Roll: {getRole(project?.users.find((u) => u.userId === accountInfo?.userId)?.userProjectRole.name || "")}</p>

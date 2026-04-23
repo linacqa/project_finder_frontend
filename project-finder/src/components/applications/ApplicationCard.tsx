@@ -20,17 +20,18 @@ export default function ApplicationCard({
 	return (
 		<TTNewCard key={application.id} className="mb-4">
 			<TTNewCardContent>
-				<Heading as="h3" visual="h5">
+				<Heading as="h3" visual="h5" className="project-header-title">
 					<Link href={`/project/${application.projectId}`}>
 						{application.project?.titleInEstonian}
 					</Link>
 				</Heading>
-				<Heading as="h4" visual="h6">
+				<Heading as="h4" visual="h6" className="project-header-title">
 					{application.project?.titleInEnglish}
 				</Heading>
 				<p>
-					Kandideerimise autor: {application.user?.firstName}{" "}
-					{application.user?.lastName} ({application.user?.email})
+					Kandideerimise autor: <Link href={`/profile/${application.user?.id}`}>
+						{application.user?.firstName} {application.user?.lastName}
+					</Link> ({application.user?.email})
 				</p>
 				{application.group && (
 					<p>

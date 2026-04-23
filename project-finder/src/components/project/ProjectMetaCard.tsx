@@ -1,4 +1,5 @@
 import { IProject } from "@/types/domain/IProject";
+import Link from "next/dist/client/link";
 import { Heading, Tag, TagVariants, TTNewCard, TTNewCardContent } from "taltech-styleguide";
 
 interface ProjectMetaCardProps {
@@ -61,7 +62,7 @@ export default function ProjectMetaCard({ project }: ProjectMetaCardProps) {
 									?.filter((u) => u.userProjectRole.name === "Supervisor")
 									.map((u, index) => (
 										<div key={index}>
-											{u.user.firstName} {u.user.lastName} ({u.user.email})
+											<Link href={`/profile/${u.user.id}`}>{u.user.firstName} {u.user.lastName}</Link> ({u.user.email})
 										</div>
 									))}
 								{project?.supervisor && <div>{project.supervisor}</div>}
@@ -81,7 +82,7 @@ export default function ProjectMetaCard({ project }: ProjectMetaCardProps) {
 									?.filter((u) => u.userProjectRole.name === "External Supervisor")
 									.map((u, index) => (
 										<div key={index}>
-											{u.user.firstName} {u.user.lastName} ({u.user.email})
+											<Link href={`/profile/${u.user.id}`}>{u.user.firstName} {u.user.lastName}</Link> ({u.user.email})
 										</div>
 									))}
 								{project?.externalSupervisor && <div>{project.externalSupervisor}</div>}

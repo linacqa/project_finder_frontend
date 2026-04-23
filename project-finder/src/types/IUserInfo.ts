@@ -6,4 +6,7 @@ export interface IUserInfo extends IDomainId {
 	lastName: string;
 	phoneNumber: string;
 	role: string;
+	uniId: string | null;
+	matriculationNumber: string | null;
+	program: string | null;
 }

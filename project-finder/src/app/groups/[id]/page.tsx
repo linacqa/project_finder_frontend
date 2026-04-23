@@ -8,6 +8,7 @@ import { UserService } from "@/services/UserService";
 import { IGroup } from "@/types/domain/IGroup";
 import { IInvitation } from "@/types/domain/IInvitation";
 import { useRouter } from "next/dist/client/components/navigation";
+import Link from "next/link";
 import { use, useContext, useEffect, useState } from "react";
 import {
 	ALERT_POSITION_TYPES,
@@ -284,8 +285,11 @@ export default function GroupDetails({
 				</>
 			)}
 			<Heading as="h2" visual="h6" className="mb-3">
-				Looja: {group?.creator?.firstName} {group?.creator.lastName} (
-				{group?.creator.email})
+				Looja:{" "}
+				<Link href={`/profile/${group?.creator?.id}`}>
+					{group?.creator?.firstName} {group?.creator.lastName}
+				</Link>{" "}
+				({group?.creator.email})
 			</Heading>
 			{group?.users && group.users.length > 0 && (
 				<Heading as="h4" visual="h5">
@@ -298,8 +302,10 @@ export default function GroupDetails({
 					className="d-flex align-items-center gap-2 mb-2"
 				>
 					<StatusTag type={STATUS_TYPE.INFO}>
-						{user.user.firstName} {user.user.lastName} (
-						{user.user.email}) - {user.role}
+						<Link href={`/profile/${user.user.id}`}>
+							{user.user.firstName} {user.user.lastName}
+						</Link>{" "}
+						({user.user.email}) - {user.role}
 					</StatusTag>
 					{group?.creatorId === accountInfo?.userId &&
 						user.userId !== accountInfo?.userId && (

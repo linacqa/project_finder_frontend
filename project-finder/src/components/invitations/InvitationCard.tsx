@@ -1,4 +1,5 @@
 import { IInvitation } from "@/types/domain/IInvitation";
+import Link from "next/dist/client/link";
 import {
 	ButtonGroup,
 	Heading,
@@ -27,12 +28,12 @@ export default function InvitationCard({
 	return (
 		<TTNewCard className="mb-4">
 			<TTNewCardContent>
-				<Heading as="h3" visual="h5">
+				<Heading as="h3" visual="h5" className="project-header-title">
 					{invite.group.name}
 				</Heading>
 				<p>
-					Saatja: {invite.fromUser.firstName}{" "}
-					{invite.fromUser.lastName} ({invite.fromUser.email})
+					Saatja: <Link href={`/profile/${invite.fromUser.id}`}>{invite.fromUser.firstName}{" "}
+					{invite.fromUser.lastName}</Link> ({invite.fromUser.email})
 				</p>
 				{invite.group.users && invite.group.users.length > 0 && (
 					<div className="mt-3 mb-3">
@@ -42,8 +43,8 @@ export default function InvitationCard({
 								key={usergroup.id}
 								type={STATUS_TYPE.INFO}
 							>
-								{usergroup.user.firstName}{" "}
-								{usergroup.user.lastName} (
+								<Link href={`/profile/${usergroup.userId}`}>{usergroup.user.firstName}{" "}
+								{usergroup.user.lastName}</Link> (
 								{usergroup.user.email}) - {usergroup.role}
 							</StatusTag>
 						))}

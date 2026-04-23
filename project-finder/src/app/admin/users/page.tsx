@@ -4,7 +4,12 @@ import { UserService } from "@/services/UserService";
 import { IUserInfo } from "@/types/IUserInfo";
 import { useRouter } from "next/dist/client/components/navigation";
 import { useContext, useEffect, useState } from "react";
-import { TTNewButton, TTNewContainer, TTNewSelect } from "taltech-styleguide";
+import {
+	ButtonGroup,
+	TTNewButton,
+	TTNewContainer,
+	TTNewSelect,
+} from "taltech-styleguide";
 
 export default function Users() {
 	const [users, setUsers] = useState<IUserInfo[]>([]);
@@ -125,13 +130,24 @@ export default function Users() {
 							setNewRole(value.value);
 						}}
 					/>
-					<TTNewButton
-						className="mt-3"
-						onClick={updateUserRole}
-						disabled={!newRole || newRole === selectedUser.role}
-					>
-						Salvesta
-					</TTNewButton>
+					<ButtonGroup>
+						<TTNewButton
+							className="mt-3"
+							onClick={updateUserRole}
+							disabled={!newRole || newRole === selectedUser.role}
+						>
+							Salvesta
+						</TTNewButton>
+						<TTNewButton
+							className="mt-3"
+							variant="light"
+							onClick={() => {
+								router.push(`/profile/${selectedUser.id}`);
+							}}
+						>
+							Vaata profiili
+						</TTNewButton>
+					</ButtonGroup>
 				</>
 			)}
 		</TTNewContainer>

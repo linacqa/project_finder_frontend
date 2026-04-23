@@ -9,6 +9,7 @@ import {
 	TTNewCardContent,
 } from "taltech-styleguide";
 import ConfirmationModal from "../modal/ConfirmationModal";
+import Link from "next/dist/client/link";
 
 interface CommentsSectionProps {
 	comments: IComment[];
@@ -94,9 +95,9 @@ export default function CommentsSection({
 			<div key={comment.id} style={{ marginLeft: depth * 24 }}>
 				<TTNewCard className="mb-2">
 					<TTNewCardContent>
-						<p>{comment.content}</p>
+						<p style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere", wordBreak: "break-word", hyphens: "auto" }}>{comment.content}</p>
 						<small className="text-muted">
-							{comment.user.firstName} {comment.user.lastName} (
+							<Link href={`/profile/${comment.userId}`}>{comment.user.firstName} {comment.user.lastName}</Link> (
 							{comment.user.email})
 						</small>
 						<br />

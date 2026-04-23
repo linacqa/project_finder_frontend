@@ -97,6 +97,10 @@ export default function Header() {
 						? {
 								links: [
 									{
+										children: "Profiil",
+										href: `/profile/${accountInfo.userId}`,
+									},
+									{
 										children: "Minu projektid",
 										href: "/myProjects",
 									},

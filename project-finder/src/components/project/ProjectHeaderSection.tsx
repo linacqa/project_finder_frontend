@@ -1,5 +1,6 @@
 import { AccountContext } from "@/context/AccountContext";
 import { IProject } from "@/types/domain/IProject";
+import Link from "next/dist/client/link";
 import { useRouter } from "next/navigation";
 import { useContext } from "react";
 import { Heading, Separator, Tag, TagVariants, TTNewButton, TTNewContainer } from "taltech-styleguide";
@@ -27,14 +28,14 @@ export default function ProjectHeaderSection({ project }: ProjectHeaderSectionPr
 					Muuda projekt
 				</TTNewButton>
 			)}
-			<Heading as="h1" visual="h1" className="mb-2">
+			<Heading as="h1" visual="h1" className="mb-2 project-header-title">
 				{project.titleInEstonian}
 			</Heading>
-			<Heading as="h2" visual="h3" className="mb-2">
+			<Heading as="h2" visual="h3" className="mb-2 project-header-title">
 				{project.titleInEnglish}
 			</Heading>
 			<Heading as="h2" visual="h6" className="mb-2">
-				Autor: {author?.firstName} {author?.lastName}
+				Autor: <Link href={`/profile/${author?.id}`}>{author?.firstName} {author?.lastName}</Link> ({author?.email})
 			</Heading>
 			{project.client && project.client !== "" && (
 				<Heading as="h2" visual="h6" className="mb-3">

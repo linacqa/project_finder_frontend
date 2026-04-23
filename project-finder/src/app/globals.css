@@ -91,10 +91,59 @@
     opacity: 1; /* Show only on hover */
 }
 
-.thesis-list-container {
+.project-list-container {
     display: flex;
     flex-wrap: wrap;
     gap: 16px;
+}
+
+.project-list-container .project-card {
+    /* 3 cards per row on desktop with 16px gaps */
+    flex: 0 0 calc((100% - 32px) / 3);
+    max-width: calc((100% - 32px) / 3);
+    min-width: 0;
+}
+
+.project-list-container .project-card .project-card-content {
+    height: 100%;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.project-list-container .project-card .project-card-main {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.project-list-container .project-card .project-card-title {
+	white-space: normal;
+	overflow-wrap: anywhere;
+	word-break: break-word;
+	hyphens: auto;
+}
+
+.project-header-title {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    hyphens: auto;
+}
+
+@media (max-width: 1200px) {
+    .project-list-container .project-card {
+        /* 2 cards per row on medium screens */
+        flex: 0 0 calc((100% - 16px) / 2);
+        max-width: calc((100% - 16px) / 2);
+    }
+}
+
+@media (max-width: 768px) {
+    .project-list-container .project-card {
+        /* 1 card per row on mobile */
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
 }
 
 .tag-list-container {

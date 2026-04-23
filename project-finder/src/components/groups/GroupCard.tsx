@@ -29,26 +29,18 @@ export default function GroupCard({
 			<TTNewCardContent>
 				{accountInfo?.jwt && accountInfo.userId === creator?.id ? (
 					<Link href={`/groups/${id}`} passHref>
-						<Heading as="h3" visual="h4" className="mb-3">
+						<Heading as="h3" visual="h4" className="mb-3 project-header-title">
 							{name}
 						</Heading>
 					</Link>
 				) : (
-					<Heading as="h3" visual="h4" className="mb-3">
+					<Heading as="h3" visual="h4" className="mb-3 project-header-title">
 						{name}
 					</Heading>
 				)}
 				<div className="mb-3">
-					Looja: {creator.firstName} {creator.lastName} (
-					<Link
-						href="#"
-						onClick={() =>
-							(window.location.href = `mailto:${creator.email}`)
-						}
-					>
-						{creator.email}
-					</Link>
-					)
+					Looja: <Link href={`/profile/${creator.id}`}>{creator.firstName} {creator.lastName}</Link> (
+					{creator.email})
 				</div>
 				{users.length > 0 && (
 					<Heading as="h4" visual="h5">
@@ -57,7 +49,7 @@ export default function GroupCard({
 				)}
 				{users.map((user, index) => (
 					<div key={user.id}>
-						{index + 1}) {user.user.firstName} {user.user.lastName}{" "}
+						{index + 1}) <Link href={`/profile/${user.userId}`}>{user.user.firstName} {user.user.lastName}</Link>{" "}
 						({user.user.email}) - {user.role}
 					</div>
 				))}

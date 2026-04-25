@@ -67,7 +67,7 @@ export default function MyProjectCard({
 				{!application?.acceptedAt && !application?.declinedAt && (
 					<p className="mt-3">Kandideerimine on ootel</p>
 				)}
-				{!application?.acceptedAt && application?.id && (
+				{!application?.acceptedAt && application?.id && application.userId === accountInfo?.userId && (
 					<>
 						<TTNewButton
 							variant="danger"

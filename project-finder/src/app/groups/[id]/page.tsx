@@ -434,7 +434,6 @@ export default function GroupDetails({
 					/>
 				</div>
 			)}
-			{/* TODO: show applications for projects */}
 		</TTNewContainer>
 	);
 }

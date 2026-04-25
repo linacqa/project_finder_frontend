@@ -47,7 +47,6 @@ export default function RegisterForm() {
 		program?: string;
 	};
 
-	// TODO: change default values to empty strings before production
 	const {
 		register,
 		handleSubmit,
@@ -55,11 +54,11 @@ export default function RegisterForm() {
 		watch,
 	} = useForm<Inputs>({
 		defaultValues: {
-			email: "user33@taltech.ee",
-			firstName: "User",
-			lastName: "Test",
-			password: "Foo.Bar.33",
-			confirmPassword: "Foo.Bar.33",
+			email: "",
+			firstName: "",
+			lastName: "",
+			password: "",
+			confirmPassword: "",
 			role: "user",
 		},
 	});

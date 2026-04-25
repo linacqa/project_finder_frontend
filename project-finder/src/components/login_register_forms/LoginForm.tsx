@@ -31,15 +31,14 @@ export default function LoginForm() {
 		password: string;
 	};
 
-	// TODO: change default values to empty strings before production
 	const {
 		register,
 		handleSubmit,
 		formState: { errors },
 	} = useForm<Inputs>({
 		defaultValues: {
-			email: "user@taltech.ee",
-			password: "Foo.Bar.2",
+			email: "",
+			password: "",
 		},
 	});
 
@@ -115,7 +114,6 @@ export default function LoginForm() {
 				)}
 
 				<form onSubmit={handleSubmit(onSubmit)}>
-					{/* TODO: make fields less wide on desktop */}
 					<div
 						className="text-danger validation-summary-valid"
 						role="alert"

@@ -68,7 +68,7 @@ export default function AddProject() {
 		}[]
 	>([]);
 
-	const [authorOptions, setAuthorOptions] = useState<
+	const [usersOptions, setUsersOptions] = useState<
 		{ label: string; id: string }[]
 	>([]);
 
@@ -130,7 +130,7 @@ export default function AddProject() {
 					projectTypesRes,
 					projectStatusesRes,
 					tagsRes,
-					authorsRes,
+					usersRes,
 					supervisorsRes,
 					stepsRes,
 					projectRes,
@@ -178,9 +178,9 @@ export default function AddProject() {
 					);
 				}
 
-				if (authorsRes.data) {
-					setAuthorOptions(
-						authorsRes.data.map((u) => ({
+				if (usersRes.data) {
+					setUsersOptions(
+						usersRes.data.map((u) => ({
 							label: `${u.firstName} ${u.lastName} (${u.email})`,
 							id: u.id,
 						})),
@@ -482,7 +482,7 @@ export default function AddProject() {
 									</Dropdown.Toggle>
 
 									<Dropdown.Menu className="shadow-sm border-0">
-										{authorOptions.map((author, index) => (
+										{usersOptions.map((author, index) => (
 											<Dropdown.Item
 												key={index}
 												className="text-primary px-3 py-2"
@@ -500,7 +500,7 @@ export default function AddProject() {
 								</Dropdown>
 								<TagList
 									tags={
-										authorOptions
+										usersOptions
 											.filter(
 												(a) =>
 													project.authorId === a.id,
@@ -813,7 +813,7 @@ export default function AddProject() {
 													</Dropdown.Toggle>
 
 													<Dropdown.Menu className="shadow-sm border-0">
-														{supervisorOptions.map(
+														{usersOptions.map(
 															(
 																externalSupervisor,
 																index,

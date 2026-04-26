@@ -281,7 +281,7 @@ export default function RegisterForm() {
 					<input
 						className="login-field"
 						aria-required="true"
-						placeholder="parool"
+						placeholder="Parool"
 						type="password"
 						id="Input_Password"
 						autoComplete="current-password"
@@ -307,7 +307,7 @@ export default function RegisterForm() {
 					<input
 						className="login-field"
 						aria-required="true"
-						placeholder="parool"
+						placeholder="Parool"
 						type="password"
 						id="Input_ConfirmPassword"
 						autoComplete="new-password"
@@ -395,7 +395,7 @@ export default function RegisterForm() {
 								aria-required="true"
 								type="text"
 								id="Input_MatriculationNumber"
-								placeholder="Matriklinumber (nt. 231234IADB)"
+								placeholder="Matriklinumber (nt. 241234IADB)"
 								{...register("matriculationNumber", {
 									required: true,
 								})}

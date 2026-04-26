@@ -149,7 +149,7 @@ export default function LoginForm() {
 						<input
 							className="login-field"
 							aria-required="true"
-							placeholder="parool"
+							placeholder="Parool"
 							type="password"
 							id="Input_Password"
 							autoComplete="current-password"

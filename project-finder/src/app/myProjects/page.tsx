@@ -51,7 +51,7 @@ export default function MyProjectsPage() {
 				]);
 				if (applicationsData.data) {
 					setApplications(applicationsData.data);
-				} else {
+				} else if (accountInfo?.role === "student") {
 					setMessage({
 						type: "error",
 						text: "Kandideerimiste laadimine ebaõnnestus.",

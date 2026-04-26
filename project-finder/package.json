@@ -17,7 +17,7 @@
     "react-bootstrap": "^2.10.10",
     "react-dom": "19.2.3",
     "react-hook-form": "7.71.1",
-    "taltech-styleguide": "^10.38.0"
+    "taltech-styleguide": "10.38.0"
   },
   "devDependencies": {
     "@types/node": "^20",
@@ -28,5 +28,9 @@
     "patch-package": "^8.0.1",
     "postinstall-postinstall": "^2.1.0",
     "typescript": "^5"
+  },
+  "overrides": {
+    "@types/react": "^19",
+    "@types/react-dom": "^19"
   }
 }

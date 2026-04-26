@@ -1,6 +1,6 @@
 import { AccountContext } from "@/context/AccountContext";
 import { IComment } from "@/types/domain/IComment";
-import { useContext, useMemo, useState } from "react";
+import { JSX, useContext, useMemo, useState } from "react";
 import {
 	Heading,
 	Input,

@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { TTNewButton, TTNewSelect, Typeahead } from "taltech-styleguide";
 
+type SelectOption = {
+	value: string;
+	label: string;
+};
+
 export default function Filters({
 	isOpen,
 	onClose,
@@ -121,7 +126,7 @@ export default function Filters({
 					}))}
 					multiple
 					onChange={(selected) =>
-						setStatusIds(selected.map((s) => s.value))
+						setStatusIds(selected.filter((s): s is SelectOption => typeof s !== "string" && "value" in s).map((s) => s.value))
 					}
 				/>
 
@@ -135,7 +140,7 @@ export default function Filters({
 					}))}
 					multiple
 					onChange={(selected) =>
-						setTagIds(selected.map((t) => t.value))
+						setTagIds(selected.filter((t): t is SelectOption => typeof t !== "string" && "value" in t).map((t) => t.value))
 					}
 				/>
 
@@ -148,8 +153,8 @@ export default function Filters({
 						label: pt.name,
 					}))}
 					multiple
-					onChange={(selected) =>
-						setProjectTypeIds(selected.map((pt) => pt.value))
+					onChange={(selected: SelectOption[]) =>
+						setProjectTypeIds(selected.filter((pt): pt is SelectOption => typeof pt !== "string" && "value" in pt).map((pt) => pt.value))
 					}
 					placeholder="Vali"
 				/>

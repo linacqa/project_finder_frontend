@@ -6,11 +6,14 @@ ARG TALTECH_NPM_TOKEN
 COPY package*.json ./
 
 RUN echo "//npm.taltech.ee/:_authToken=${TALTECH_NPM_TOKEN}" > .npmrc \
-	&& npm ci \
+	&& npm ci --legacy-peer-deps \
 	&& rm -f .npmrc
 
 FROM node:20-alpine AS builder
 WORKDIR /app
+
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .

@@ -29,7 +29,7 @@ export default function InvitationCard({
 		<TTNewCard className="mb-4">
 			<TTNewCardContent>
 				<Heading as="h3" visual="h5" className="project-header-title">
-					{invite.group.name}
+					<Link href={`/groups/${invite.groupId}`}>{invite.group.name}</Link>
 				</Heading>
 				<p>
 					Saatja: <Link href={`/profile/${invite.fromUser.id}`}>{invite.fromUser.firstName}{" "}

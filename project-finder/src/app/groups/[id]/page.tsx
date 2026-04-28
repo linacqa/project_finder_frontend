@@ -90,6 +90,11 @@ export default function GroupDetails({
 			setInviteRole("");
 			setSelectedStudent(null);
 			setMessage({ type: "success", text: "Kutse saadetud." });
+			invitationService.allAsyncByGroupId(groupId).then((invitationsRes) => {
+				if (invitationsRes.data) {
+					setInvitations(invitationsRes.data);
+				}
+			});
 			return;
 		}
 

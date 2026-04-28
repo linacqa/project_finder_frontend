@@ -88,6 +88,13 @@ export default function MyProjectsPage() {
 						type: "success",
 						text: "Kandideerimine kustutatud.",
 					});
+					applicationService
+						.getCurrentUsersAllAsync()
+						.then((applicationsRes) => {
+							if (applicationsRes.data) {
+								setApplications(applicationsRes.data);
+							}
+						});
 					return;
 				}
 

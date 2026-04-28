@@ -13,7 +13,8 @@ import {
 	TTNewSelect,
 } from "taltech-styleguide";
 import ConfirmationModal from "../modal/ConfirmationModal";
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { AccountContext } from "@/context/AccountContext";
 
 interface ApplicationCardProps {
 	isStudent: boolean;
@@ -51,6 +52,7 @@ export default function ApplicationCard({
 	onDelete,
 }: ApplicationCardProps) {
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
+	const { accountInfo } = useContext(AccountContext);
 
 	if (!isStudent) {
 		return null;
@@ -98,7 +100,9 @@ export default function ApplicationCard({
 											}
 										/>
 									)}
-								{project?.minStudents === 1 && (
+								{project?.minStudents === 1 || (isGroupApplication &&
+									project?.maxStudents &&
+									project.maxStudents >= 2) && (
 									<TTNewButton onClick={onApply}>
 										Kandideeri
 									</TTNewButton>
@@ -141,7 +145,7 @@ export default function ApplicationCard({
 									/>
 								)}
 							</div>
-							{!application.acceptedAt && (
+							{!application.acceptedAt && (application.userId === accountInfo?.userId) && (
 								<>
 									<TTNewButton
 										variant="danger"

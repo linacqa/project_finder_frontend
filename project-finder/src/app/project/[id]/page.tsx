@@ -121,20 +121,20 @@ export default function ProjectDetails({
 						errors.push(
 							`Projekti laadimine: ${projectRes?.errors}`,
 						);
-					if (!commentsRes?.data && !(commentsRes.statusCode == 401))
+					if (!commentsRes?.data && projectRes?.data?.users.some((u) => u.userId === accountInfo?.userId))
 						errors.push(
 							`Kommentaaride laadimine: ${commentsRes?.errors}`,
 						);
 					if (
 						!projectStepsRes?.data &&
-						!(projectStepsRes.statusCode == 401)
+						projectRes?.data?.users.some((u) => u.userId === accountInfo?.userId)
 					)
 						errors.push(
 							`Etappide laadimine: ${projectStepsRes?.errors}`,
 						);
 					if (
 						!stepStatusesRes?.data &&
-						!(stepStatusesRes.statusCode == 401)
+						projectRes?.data?.users.some((u) => u.userId === accountInfo?.userId)
 					)
 						errors.push(
 							`Staatuste laadimine: ${stepStatusesRes?.errors}`,

@@ -285,7 +285,7 @@ export default function RegisterForm() {
 						placeholder="Parool"
 						type="password"
 						id="Input_Password"
-						autoComplete="current-password"
+						autoComplete="new-password"
 						{...register("password", { required: true })}
 					/>
 					{errors.password && (

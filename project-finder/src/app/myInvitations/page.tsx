@@ -35,6 +35,11 @@ export default function MyInvitationsPage() {
 		if (res && res.statusCode && res.statusCode <= 300) {
 			setInvitations((prev) => prev.filter((invite) => invite.id !== id));
 			setMessage({ type: "success", text: "Kutse aktsepteeritud." });
+			invitationService.getAllAsync().then((res) => {
+				if (res.data) {
+					setInvitations(res.data);
+				}
+			});
 			return;
 		}
 
@@ -51,6 +56,11 @@ export default function MyInvitationsPage() {
 		if (res && res.statusCode && res.statusCode <= 300) {
 			setInvitations((prev) => prev.filter((invite) => invite.id !== id));
 			setMessage({ type: "success", text: "Kutsest keelduti." });
+			invitationService.getAllAsync().then((res) => {
+				if (res.data) {
+					setInvitations(res.data);
+				}
+			});
 			return;
 		}
 

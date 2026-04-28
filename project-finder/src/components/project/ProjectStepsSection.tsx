@@ -1,6 +1,7 @@
+import { AccountContext } from "@/context/AccountContext";
 import { IProjectStep } from "@/types/domain/IProjectStep";
 import { IStepStatus } from "@/types/domain/IStepStatus";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import {
 	ButtonGroup,
 	Heading,
@@ -41,6 +42,7 @@ export default function ProjectStepsSection({
 	onStatusChange,
 }: ProjectStepsSectionProps) {
 	const [editingStepId, setEditingStepId] = useState<string | null>(null);
+	const { accountInfo } = useContext(AccountContext);
 
 	return (
 		<div className="row mt-3">
@@ -65,26 +67,28 @@ export default function ProjectStepsSection({
 									)}
 									as="div"
 								/>
-								<TTNewButton
-									variant="secondary"
-									icon={
-										<svg
-											xmlns="http://www.w3.org/2000/svg"
-											width="14"
-											height="14"
-											viewBox="0 0 16 16"
-											fill="currentColor"
-											aria-hidden="true"
-										>
-											<path d="M12.854.146a.5.5 0 0 0-.708 0L10.5 1.793l3.707 3.707 1.647-1.646a.5.5 0 0 0 0-.708l-3-3z" />
-											<path d="M10.793 2.5 2 11.293V14h2.707L13.5 5.207 10.793 2.5z" />
-										</svg>
-									}
-									size="sm"
-									onClick={() =>
-										setEditingStepId(projectStep.id)
-									}
-								/>
+								{accountInfo?.role !== "admin" && (
+									<TTNewButton
+										variant="secondary"
+										icon={
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												width="14"
+												height="14"
+												viewBox="0 0 16 16"
+												fill="currentColor"
+												aria-hidden="true"
+											>
+												<path d="M12.854.146a.5.5 0 0 0-.708 0L10.5 1.793l3.707 3.707 1.647-1.646a.5.5 0 0 0 0-.708l-3-3z" />
+												<path d="M10.793 2.5 2 11.293V14h2.707L13.5 5.207 10.793 2.5z" />
+											</svg>
+										}
+										size="sm"
+										onClick={() =>
+											setEditingStepId(projectStep.id)
+										}
+									/>
+								)}
 							</div>
 							{editingStepId === projectStep.id && (
 								<div className="mt-2">

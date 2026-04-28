@@ -85,7 +85,10 @@ export default function AllProjects() {
 		void loadProjects(mergedFilters);
 	};
 
-	const loadProjects = async (activeFilters?: FiltersState, page?: number) => {
+	const loadProjects = async (
+		activeFilters?: FiltersState,
+		page?: number,
+	) => {
 		setMessage({ type: "loading", text: "Laadin projekte..." });
 
 		const filtersToUse = activeFilters ?? filters;
@@ -208,6 +211,7 @@ export default function AllProjects() {
 						placeholder="Otsi projekte..."
 						value={search}
 						onChange={(e) => setSearch(e.target.value)}
+						onBlur={() => void loadProjects(filters)}
 					/>
 				</FormGroup>
 			</div>

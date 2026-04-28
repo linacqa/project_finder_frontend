@@ -841,7 +841,7 @@ export default function AddProject() {
 												</Dropdown>
 												<TagList
 													tags={
-														supervisorOptions
+														usersOptions
 															.filter(
 																(s) =>
 																	project.externalSupervisorId ===

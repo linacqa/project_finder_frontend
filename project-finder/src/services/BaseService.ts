@@ -1,7 +1,5 @@
-import { AccountContext } from "@/context/AccountContext";
 import { ILoginDto } from "@/types/ILoginDto";
 import axios, { AxiosInstance } from "axios";
-import { useContext } from "react";
 
 export abstract class BaseService {
 	protected axiosInstance: AxiosInstance;

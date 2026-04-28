@@ -288,6 +288,9 @@ export default function SubmitIdea() {
 </body>
 </html>
 `;
+
+		setMessage({ type: "loading", text: "Saadan e-kirja..." });
+
 		try {
 			var res = await userService.emailAdminsAsync(
 				"Uus projekti idee",
@@ -690,7 +693,7 @@ export default function SubmitIdea() {
 								}
 							/>
 						</FormGroup>
-						<TTNewButton type="submit">Esita</TTNewButton>
+						<TTNewButton type="submit" disabled={message?.type === "loading"}>Esita</TTNewButton>
 					</form>
 				</TTNewCardContent>
 			</TTNewCard>

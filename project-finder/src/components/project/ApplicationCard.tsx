@@ -68,15 +68,20 @@ export default function ApplicationCard({
 					{!application &&
 						project?.projectStatus.name === "Avatud" && (
 							<>
-								<CustomInput
-									className="mb-2"
-									label="Kandideeri grupina"
-									type="checkbox"
-									checked={isGroupApplication}
-									onChange={(e) =>
-										setIsGroupApplication(e.target.checked)
-									}
-								/>
+								{project.maxStudents &&
+									project.maxStudents >= 2 && (
+										<CustomInput
+											className="mb-2"
+											label="Kandideeri grupina"
+											type="checkbox"
+											checked={isGroupApplication}
+											onChange={(e) =>
+												setIsGroupApplication(
+													e.target.checked,
+												)
+											}
+										/>
+									)}
 								{isGroupApplication &&
 									project?.maxStudents &&
 									project.maxStudents >= 2 && (
@@ -155,7 +160,9 @@ export default function ApplicationCard({
 										text="Kas soovite selle kandideerimist jäädavalt kustutada? Seda toimingut ei saa tagasi võtta."
 										confirmText="Jah, kustuta"
 										confirmAction={() =>
-											handleDeleteApplication(application.id)
+											handleDeleteApplication(
+												application.id,
+											)
 										}
 									/>
 								</>

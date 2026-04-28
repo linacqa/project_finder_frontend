@@ -26,7 +26,6 @@ import { ProjectStepService } from "@/services/ProjectStepService";
 import ProjectStepsSection from "@/components/project/ProjectStepsSection";
 import { IStepStatus } from "@/types/domain/IStepStatus";
 import { StepStatusService } from "@/services/StepStatusService";
-import { set } from "react-hook-form";
 import { useRouter } from "next/dist/client/components/navigation";
 
 export default function ProjectDetails({

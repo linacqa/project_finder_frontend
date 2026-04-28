@@ -41,15 +41,18 @@ export class AccountService extends BaseService {
 			};
 		} catch (error) {
 			const axiosError = error as AxiosError<{ errors?: string[] }>;
-			const errors = (axiosError.response?.data as { errors?: Map<string, string[]> })
-				?.errors;
+			const errors = (
+				axiosError.response?.data as { errors?: Map<string, string[]> }
+			)?.errors;
 			const errorMessages = errors
 				? Object.values(errors).flat().filter(Boolean)
 				: null;
 			return {
 				statusCode: axiosError.response?.status,
 				errors: errorMessages ?? [
-					axiosError.response?.statusText ?? axiosError.code ?? axiosError.message,
+					axiosError.response?.statusText ??
+						axiosError.code ??
+						axiosError.message,
 				],
 			};
 		}
@@ -103,16 +106,28 @@ export class AccountService extends BaseService {
 				],
 			};
 		} catch (error) {
-			const axiosError = error as AxiosError<{ errors?: string[] }>;
-			const errors = (axiosError.response?.data as { errors?: Map<string, string[]> })
-				?.errors;
+			const axiosError = error as AxiosError<{
+				error?: string;
+				errors?: string[];
+			}>;
+			if (axiosError.response?.data.error) {
+				return {
+					statusCode: axiosError.response.status,
+					errors: [axiosError.response.data.error],
+				};
+			}
+			const errors = (
+				axiosError.response?.data as { errors?: Map<string, string[]> }
+			)?.errors;
 			const errorMessages = errors
 				? Object.values(errors).flat().filter(Boolean)
 				: null;
 			return {
 				statusCode: axiosError.response?.status,
 				errors: errorMessages ?? [
-					axiosError.response?.statusText ?? axiosError.code ?? axiosError.message,
+					axiosError.response?.statusText ??
+						axiosError.code ??
+						axiosError.message,
 				],
 			};
 		}
@@ -146,7 +161,9 @@ export class AccountService extends BaseService {
 			return {
 				statusCode: axiosError.response?.status,
 				errors: axiosError.response?.data?.errors ?? [
-					axiosError.response?.statusText ?? axiosError.code ?? axiosError.message,
+					axiosError.response?.statusText ??
+						axiosError.code ??
+						axiosError.message,
 				],
 			};
 		}

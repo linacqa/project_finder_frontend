@@ -48,7 +48,7 @@ export default function AllProjects() {
 
 	const [search, setSearch] = useState("");
 	const [filters, setFilters] = useState<FiltersState>(initialFilters);
-	const [page, setPage] = useState(1);
+	const [page, setPage] = useState(0);
 	const [pageSize, setPageSize] = useState(9);
 	const [totalPages, setTotalPages] = useState(1);
 	const [filtersOpen, setFiltersOpen] = useState(false);

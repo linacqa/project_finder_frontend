@@ -119,6 +119,7 @@ export default function RegisterForm() {
 				data.program,
 				data.phoneNumber,
 			);
+			console.log("Register result:", result);
 			if (result.errors) {
 				setMessage({
 					type: "error",

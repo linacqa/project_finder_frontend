@@ -1,5 +1,4 @@
 "use client";
-import ConfirmationModal from "@/components/modal/ConfirmationModal";
 import StepCard from "@/components/steps/StepCard";
 import { AccountContext } from "@/context/AccountContext";
 import { StepService } from "@/services/StepService";

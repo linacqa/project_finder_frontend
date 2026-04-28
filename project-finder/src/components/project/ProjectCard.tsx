@@ -4,7 +4,6 @@ import {
 	Heading,
 	STATUS_TYPE,
 	StatusTag,
-	TTNewButton,
 	TTNewCard,
 	TTNewCardContent,
 } from "taltech-styleguide";

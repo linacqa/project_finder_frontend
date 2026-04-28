@@ -1,5 +1,4 @@
 "use client";
-import ConfirmationModal from "@/components/modal/ConfirmationModal";
 import TagCard from "@/components/tags/TagCard";
 import { AccountContext } from "@/context/AccountContext";
 import { TagService } from "@/services/TagService";

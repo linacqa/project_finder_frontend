@@ -4,6 +4,7 @@ WORKDIR /app
 ARG TALTECH_NPM_TOKEN
 
 COPY package*.json ./
+COPY patches ./patches
 
 RUN echo "//npm.taltech.ee/:_authToken=${TALTECH_NPM_TOKEN}" > .npmrc \
 	&& npm ci --legacy-peer-deps \

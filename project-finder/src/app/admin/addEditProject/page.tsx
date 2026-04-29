@@ -114,7 +114,7 @@ export default function AddProject() {
 			router.push("/login");
 			return;
 		}
-		if (accountInfo.role !== "admin"){
+		if (accountInfo.role !== "admin") {
 			router.push("/");
 			return;
 		}
@@ -314,7 +314,7 @@ export default function AddProject() {
 			return;
 		}
 
-		if (supervisorIsRegistered){
+		if (supervisorIsRegistered) {
 			setProject((prev) => ({
 				...prev,
 				primarySupervisor: null,
@@ -326,7 +326,7 @@ export default function AddProject() {
 			}));
 		}
 
-		if (externalSupervisorIsRegistered){
+		if (externalSupervisorIsRegistered) {
 			setProject((prev) => ({
 				...prev,
 				externalSupervisor: null,
@@ -729,7 +729,8 @@ export default function AddProject() {
 																				...project,
 																				primarySupervisorId:
 																					supervisor.id,
-																				primarySupervisor: null,
+																				primarySupervisor:
+																					null,
 																			},
 																		);
 																	}}
@@ -826,7 +827,8 @@ export default function AddProject() {
 																				...project,
 																				externalSupervisorId:
 																					externalSupervisor.id,
-																				externalSupervisor: null,
+																				externalSupervisor:
+																					null,
 																			},
 																		);
 																	}}
@@ -1054,23 +1056,31 @@ export default function AddProject() {
 									</ButtonGroup>
 								</form>
 
-								<ButtonGroup className="my-6">
-									<TTNewButton
-										variant="danger"
-										onClick={() => setShowDeleteModal(true)}
-									>
-										Kustuta projekt
-									</TTNewButton>
-								</ButtonGroup>
+								{isEditMode && (
+									<>
+										<ButtonGroup className="my-6">
+											<TTNewButton
+												variant="danger"
+												onClick={() =>
+													setShowDeleteModal(true)
+												}
+											>
+												Kustuta projekt
+											</TTNewButton>
+										</ButtonGroup>
 
-								<ConfirmationModal
-									show={showDeleteModal}
-									hideAction={() => setShowDeleteModal(false)}
-									title="Kas olete kindel?"
-									text="Kas soovite selle projekti jäädavalt kustutada? Seda toimingut ei saa tagasi võtta."
-									confirmText="Jah, kustuta"
-									confirmAction={handleDeleteConfirm}
-								/>
+										<ConfirmationModal
+											show={showDeleteModal}
+											hideAction={() =>
+												setShowDeleteModal(false)
+											}
+											title="Kas olete kindel?"
+											text="Kas soovite selle projekti jäädavalt kustutada? Seda toimingut ei saa tagasi võtta."
+											confirmText="Jah, kustuta"
+											confirmAction={handleDeleteConfirm}
+										/>
+									</>
+								)}
 
 								<ButtonGroup
 									className="mt-4"

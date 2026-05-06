@@ -89,6 +89,11 @@ export default function Header() {
 						],
 						href: "/",
 					},
+					{
+						active: false,
+						children: "Privaatsuspoliitika",
+						href: "/privacyPolicy",
+					}
 				]}
 				logoLink={{
 					children: "Logo aria",

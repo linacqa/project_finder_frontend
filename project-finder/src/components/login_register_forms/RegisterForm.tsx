@@ -13,6 +13,7 @@ import {
 	CustomInput,
 	TTNewAlert,
 	TTNewButton,
+	TTNewRow,
 } from "taltech-styleguide";
 
 export default function RegisterForm() {
@@ -32,6 +33,7 @@ export default function RegisterForm() {
 		"IT süsteemide administreerimine (IAAB)",
 		"Cyber Security Engineering (IVSB)",
 		"Infosüsteemide analüüs ja kavandamine (IAAM)",
+		"Digimuutused ettevõttes (IADM)",
 	];
 
 	type Inputs = {
@@ -45,6 +47,7 @@ export default function RegisterForm() {
 		uniId?: string;
 		matriculationNumber?: string;
 		program?: string;
+		policy: boolean;
 	};
 
 	const {
@@ -60,6 +63,7 @@ export default function RegisterForm() {
 			password: "",
 			confirmPassword: "",
 			role: "user",
+			policy: false,
 		},
 	});
 
@@ -104,6 +108,13 @@ export default function RegisterForm() {
 		}
 		if (data.password !== data.confirmPassword) {
 			setMessage({ type: "error", text: "Paroolid ei kattu" });
+			return;
+		}
+		if (!data.policy) {
+			setMessage({
+				type: "error",
+				text: "Registreerimiseks peate nõustuma privaatsuspoliitikaga",
+			});
 			return;
 		}
 
@@ -440,6 +451,34 @@ export default function RegisterForm() {
 						</div>
 					</>
 				)}
+				<div>
+					<div>
+						<div className="d-flex align-items-center justify-content-center gap-2 flex-wrap text-start">
+							<CustomInput
+								type="checkbox"
+								id="policy"
+								{...register("policy", { required: true })}
+							/>
+							<label htmlFor="policy" className="small text-bold m-0">
+								Olen tutvunud{" "}
+								<a href="/privacyPolicy" target="_blank">
+									privaatsuspoliitikaga{" "}
+								</a>
+								ja saan aru, et osa minu profiiliandmetest on
+								nähtavad teistele kasutajatele. *
+							</label>
+						</div>
+					</div>
+					{errors.policy && (
+						<span
+							className="text-danger field-validation-valid"
+							data-valmsg-for="Input.Policy"
+							data-valmsg-replace="true"
+						>
+							Kohustuslik!
+						</span>
+					)}
+				</div>
 
 				<ButtonGroup
 					className="mt-4 centered-button"

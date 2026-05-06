@@ -203,4 +203,125 @@ export class AccountService extends BaseService {
 			};
 		}
 	}
+
+	async updateAccountInfoAsync(
+		firstName: string,
+		lastName: string,
+		email: string,
+		phoneNumber?: string,
+		uniId?: string,
+		matriculationNumber?: string,
+		program?: string,
+	): Promise<IResultObject<ICurrentUserInfo>> {
+		const url = "Account/UpdateCurrentUserInfo";
+		try {
+			const updateData = {
+				firstName,
+				lastName,
+				email,
+				phoneNumber,
+				uniId,
+				matriculationNumber,
+				program,
+			};
+
+			const response = await this.axiosInstance.put(
+				url,
+				updateData,
+			);
+
+			if (response.status <= 300) {
+				return {
+					statusCode: response.status,
+					data: response.data,
+				};
+			}
+
+			return {
+				statusCode: response.status,
+				errors: [
+					(
+						response.status.toString() +
+						" " +
+						response.statusText
+					).trim(),
+				],
+			};
+		} catch (error) {
+			const axiosError = error as AxiosError<{
+				error?: string;
+				errors?: string[];
+			}>;
+			if (axiosError.response?.data.error) {
+				return {
+					statusCode: axiosError.response.status,
+					errors: [axiosError.response.data.error],
+				};
+			}
+			const errors = (
+				axiosError.response?.data as { errors?: Map<string, string[]> }
+			)?.errors;
+			const errorMessages = errors
+				? Object.values(errors).flat().filter(Boolean)
+				: null;
+			return {
+				statusCode: axiosError.response?.status,
+				errors: errorMessages ?? [
+					axiosError.response?.statusText ??
+						axiosError.code ??
+						axiosError.message,
+				],
+			};
+		}
+	}
+
+	async deleteAccountAsync(): Promise<IResultObject<void>> {
+		const url = "Account/Delete";
+		try {
+			const response = await this.axiosInstance.delete(url);
+
+			if (response.status <= 300) {
+				return {
+					statusCode: response.status,
+					data: undefined,
+				};
+			}
+
+			return {
+				statusCode: response.status,
+				errors: [
+					(
+						response.status.toString() +
+						" " +
+						response.statusText
+					).trim(),
+				],
+			};
+		} catch (error) {
+			const axiosError = error as AxiosError<{
+				error?: string;
+				errors?: string[];
+			}>;
+			if (axiosError.response?.data.error) {
+				return {
+					statusCode: axiosError.response.status,
+					errors: [axiosError.response.data.error],
+				};
+			}
+			const errors = (
+				axiosError.response?.data as { errors?: Map<string, string[]> }
+			)?.errors;
+			const errorMessages = errors
+				? Object.values(errors).flat().filter(Boolean)
+				: null;
+			return {
+				statusCode: axiosError.response?.status,
+				errors: errorMessages ?? [
+					axiosError.response?.statusText ??
+						axiosError.code ??
+						axiosError.message,
+				],
+			};
+		}
+	}
 }

@@ -9,7 +9,9 @@ import {
 	ALERT_POSITION_TYPES,
 	ALERT_SIZE,
 	ALERT_STATUS_TYPE,
+	ButtonGroup,
 	TTNewAlert,
+	TTNewButton,
 	TTNewCard,
 	TTNewCardContent,
 	TTNewContainer,
@@ -83,8 +85,9 @@ export default function ProfilePage({
 				</div>
 			)}
 			<h1>Profiil</h1>
+
 			{userInfo ? (
-				<TTNewCard>
+				<TTNewCard className="mb-3">
 					<TTNewCardContent>
 						<h5>
 							Nimi: {userInfo.firstName} {userInfo.lastName}
@@ -107,6 +110,13 @@ export default function ProfilePage({
 				</TTNewCard>
 			) : (
 				<p>Kasutajat ei leitud.</p>
+			)}
+			{userId === accountInfo?.userId && (
+				<ButtonGroup className="mb-3">
+					<TTNewButton onClick={() => router.push("/editProfile")}>
+						Muuda andmeid
+					</TTNewButton>
+				</ButtonGroup>
 			)}
 		</TTNewContainer>
 	);

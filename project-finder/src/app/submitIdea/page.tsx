@@ -59,7 +59,7 @@ export default function SubmitIdea() {
 			return;
 		}
 
-		if (!accountInfo.jwt) {
+		if (!accountInfo.isAuthenticated) {
 			router.push("/login");
 			return;
 		}

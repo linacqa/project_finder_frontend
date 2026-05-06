@@ -1,8 +1,10 @@
 "use client";
 
+import { AccountContext } from "@/context/AccountContext";
 import { UserService } from "@/services/UserService";
 import { IUserInfo } from "@/types/IUserInfo";
-import { use, useEffect, useState } from "react";
+import { useRouter } from "next/dist/client/components/navigation";
+import { use, useContext, useEffect, useState } from "react";
 import {
 	ALERT_POSITION_TYPES,
 	ALERT_SIZE,
@@ -20,6 +22,8 @@ export default function ProfilePage({
 }) {
 	const userId = use(params).id;
 	const [userInfo, setUserInfo] = useState<IUserInfo | null>(null);
+	const { accountInfo } = useContext(AccountContext);
+	const router = useRouter();
 
 	const [message, setMessage] = useState<{
 		type: string;
@@ -27,6 +31,18 @@ export default function ProfilePage({
 	} | null>(null);
 
 	const userService = new UserService();
+
+	useEffect(() => {
+		// Wait for AppState hydration before deciding auth redirect.
+		if (accountInfo === undefined) {
+			return;
+		}
+
+		if (!accountInfo.isAuthenticated) {
+			router.push("/login");
+			return;
+		}
+	}, [accountInfo]);
 
 	useEffect(() => {
 		const fetchUserInfo = async () => {

@@ -76,7 +76,7 @@ export default function MyInvitationsPage() {
 			return;
 		}
 
-		if (!accountInfo.jwt) {
+		if (!accountInfo.isAuthenticated) {
 			router.push("/login");
 			return;
 		}

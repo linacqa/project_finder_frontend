@@ -5,6 +5,7 @@ import React, { useContext } from "react";
 import { ToastContainer } from "react-toastify";
 import { AccountContext } from "@/context/AccountContext";
 import { useRouter } from "next/navigation";
+import { AccountService } from "@/services/AccountService";
 
 const HeaderStyleguide = dynamic(
 	() => import("taltech-styleguide").then((mod) => mod.Header),
@@ -13,12 +14,14 @@ const HeaderStyleguide = dynamic(
 
 export default function Header() {
 	const { accountInfo, setAccountInfo } = useContext(AccountContext);
+	const accountService = new AccountService();
 
 	const router = useRouter();
 
-	const handleLogout = (e: React.MouseEvent) => {
+	const handleLogout = async (e: React.MouseEvent<HTMLAnchorElement>) => {
 		e.preventDefault();
 		setAccountInfo!({});
+		await accountService.logoutAsync();
 		router.push("/login");
 	};
 
@@ -30,7 +33,7 @@ export default function Header() {
 						active: true,
 						children: "Projektide süsteem",
 						items: [
-							...(accountInfo?.jwt
+							...(accountInfo?.isAuthenticated
 								? [
 										{
 											children:
@@ -39,7 +42,7 @@ export default function Header() {
 										},
 									]
 								: []),
-							...(accountInfo?.jwt
+							...(accountInfo?.isAuthenticated
 								? // &&
 									// (accountInfo.role === "student" ||
 									// 	accountInfo.role === "teacher")
@@ -50,7 +53,7 @@ export default function Header() {
 										},
 									]
 								: []),
-							...(accountInfo?.jwt &&
+							...(accountInfo?.isAuthenticated &&
 							accountInfo.role === "student"
 								? [
 										{
@@ -59,7 +62,7 @@ export default function Header() {
 										},
 									]
 								: []),
-							...(accountInfo?.jwt && accountInfo.role === "admin"
+							...(accountInfo?.isAuthenticated && accountInfo.role === "admin"
 								? [
 										{
 											children: "Lisa uus projekt",
@@ -93,7 +96,7 @@ export default function Header() {
 					target: "_blank",
 				}}
 				profile={
-					accountInfo?.jwt
+					accountInfo?.isAuthenticated
 						? {
 								links: [
 									{

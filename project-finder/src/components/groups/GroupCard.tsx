@@ -27,7 +27,7 @@ export default function GroupCard({
 	return (
 		<TTNewCard className="mb-4 w-auto" key={id}>
 			<TTNewCardContent>
-				{accountInfo?.jwt && accountInfo.userId === creator?.id ? (
+				{accountInfo?.isAuthenticated && accountInfo.userId === creator?.id ? (
 					<Link href={`/groups/${id}`} passHref>
 						<Heading as="h3" visual="h4" className="mb-3 project-header-title">
 							{name}

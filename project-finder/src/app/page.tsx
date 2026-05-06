@@ -138,7 +138,7 @@ export default function AllProjects() {
 			return;
 		}
 
-		if (!accountInfo.jwt) {
+		if (!accountInfo.isAuthenticated) {
 			router.push("/login");
 			return;
 		}

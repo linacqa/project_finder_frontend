@@ -16,7 +16,7 @@ export class AccountService extends BaseService {
 				password,
 			};
 
-			const response = await this.axiosInstance.post<ILoginDto>(
+			const response = await this.axiosInstance.post(
 				// url + "?jwtExpiresInSeconds=5",
 				url,
 				loginData,
@@ -83,7 +83,7 @@ export class AccountService extends BaseService {
 				phoneNumber,
 			};
 
-			const response = await this.axiosInstance.post<ILoginDto>(
+			const response = await this.axiosInstance.post(
 				url,
 				registerData,
 			);
@@ -143,6 +143,41 @@ export class AccountService extends BaseService {
 				return {
 					statusCode: response.status,
 					data: response.data,
+				};
+			}
+
+			return {
+				statusCode: response.status,
+				errors: [
+					(
+						response.status.toString() +
+						" " +
+						response.statusText
+					).trim(),
+				],
+			};
+		} catch (error) {
+			const axiosError = error as AxiosError<{ errors?: string[] }>;
+			return {
+				statusCode: axiosError.response?.status,
+				errors: axiosError.response?.data?.errors ?? [
+					axiosError.response?.statusText ??
+						axiosError.code ??
+						axiosError.message,
+				],
+			};
+		}
+	}
+
+	async logoutAsync(): Promise<IResultObject<void>> {
+		const url = "Account/Logout";
+		try {
+			const response = await this.axiosInstance.post(url);
+
+			if (response.status <= 300) {
+				return {
+					statusCode: response.status,
+					data: undefined,
 				};
 			}
 

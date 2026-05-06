@@ -12,28 +12,12 @@ export default function AppState({
 
 	const updateAccountInfo = (value: IAccountInfo) => {
 		setAccountInfo(value);
-		localStorage.setItem("_jwt", value.jwt!);
-		localStorage.setItem("_refreshToken", value.refreshToken!);
-		localStorage.setItem("_firstName", value.firstName || "");
-		localStorage.setItem("_lastName", value.lastName || "");
-		localStorage.setItem("_role", value.role || "");
-		localStorage.setItem("_userId", value.userId || "");
 	};
 
 	useEffect(() => {
 		let isMounted = true;
 
 		const hydrateAccountInfo = async () => {
-			const jwt = localStorage.getItem("_jwt");
-			const refreshToken = localStorage.getItem("_refreshToken");
-
-			if (!jwt || !refreshToken) {
-				if (isMounted) {
-					setAccountInfo({});
-				}
-				return;
-			}
-
 			const accountService = new AccountService();
 			const userInfo = await accountService.getCurrentUserInfoAsync();
 
@@ -47,13 +31,12 @@ export default function AppState({
 			}
 
 			setAccountInfo({
-				jwt,
-				refreshToken,
 				firstName: userInfo.data.firstName,
 				lastName: userInfo.data.lastName,
 				role: userInfo.data.role,
 				userId: userInfo.data.id,
 				email: userInfo.data.email,
+				isAuthenticated: true,
 			});
 		};
 

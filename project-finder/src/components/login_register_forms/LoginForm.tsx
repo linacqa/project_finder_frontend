@@ -64,16 +64,17 @@ export default function LoginForm() {
 
 			setMessage({ type: "success", text: "Sisselogimine õnnestus!" });
 
-			var accountInfo: IAccountInfo = {
-				jwt: result.data!.jwt,
-				refreshToken: result.data!.refreshToken,
-			};
-			setAccountInfo!(accountInfo);
+			// var accountInfo: IAccountInfo = {
+			// 	jwt: result.data!.jwt,
+			// 	refreshToken: result.data!.refreshToken,
+			// };
+			// setAccountInfo!(accountInfo);
 
 			var userInfo = await accountService.getCurrentUserInfoAsync();
 
 			setAccountInfo!({
-				...accountInfo,
+				// ...accountInfo,
+				isAuthenticated: true,
 				firstName: userInfo.data!.firstName,
 				lastName: userInfo.data!.lastName,
 				role: userInfo.data!.role,

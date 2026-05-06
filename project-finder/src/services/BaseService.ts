@@ -1,4 +1,3 @@
-import { ILoginDto } from "@/types/ILoginDto";
 import axios, { AxiosInstance } from "axios";
 
 export abstract class BaseService {
@@ -13,20 +12,8 @@ export abstract class BaseService {
 				"Content-Type": "application/json",
 				Accept: "application/json",
 			},
+			withCredentials: true,
 		});
-
-		this.axiosInstance.interceptors.request.use(
-			(config) => {
-				const token = localStorage.getItem("_jwt");
-				if (token) {
-					config.headers.Authorization = `Bearer ${token}`;
-				}
-				return config;
-			},
-			(error) => {
-				return Promise.reject(error);
-			},
-		);
 
 		this.axiosInstance.interceptors.response.use(
 			(response) => {
@@ -42,27 +29,13 @@ export abstract class BaseService {
 				) {
 					originalRequest._retry = true;
 					try {
-						const jwt = localStorage.getItem("_jwt");
-						const refreshToken =
-							localStorage.getItem("_refreshToken");
-						const response = await axios.post<ILoginDto>(
+						const response = await axios.post(
 							this.axiosInstance.defaults.baseURL +
-								// "account/renewRefreshToken?jwtExpiresInSeconds=5",
-								"account/renewRefreshToken",
-							{
-								jwt: jwt,
-								refreshToken: refreshToken,
-							},
+								// "Account/RenewRefreshToken?jwtExpiresInSeconds=5",
+								"Account/RenewRefreshToken",
 						);
 
 						if (response && response.status <= 300) {
-							localStorage.setItem("_jwt", response.data.jwt);
-							localStorage.setItem(
-								"_refreshToken",
-								response.data.refreshToken,
-							);
-							originalRequest.headers.Authorization = `Bearer ${response.data.jwt}`;
-
 							return this.axiosInstance(originalRequest);
 						}
 

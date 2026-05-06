@@ -42,7 +42,7 @@ export default function Groups() {
 			return;
 		}
 
-		if (!accountInfo.jwt) {
+		if (!accountInfo.isAuthenticated) {
 			router.push("/login");
 			return;
 		}

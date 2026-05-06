@@ -171,7 +171,7 @@ export default function GroupDetails({
 			return;
 		}
 
-		if (!accountInfo.jwt) {
+		if (!accountInfo.isAuthenticated) {
 			router.push("/login");
 			return;
 		}
@@ -336,7 +336,7 @@ export default function GroupDetails({
 					}
 				}}
 			/>
-			{accountInfo?.jwt && accountInfo.userId == group?.creatorId && (
+			{accountInfo?.isAuthenticated && accountInfo.userId == group?.creatorId && (
 				<TTNewCard className="mt-5">
 					<TTNewCardContent>
 						<Heading as="h3" visual="h4" className="mb-3">

@@ -3,13 +3,14 @@
 import { createContext } from "react";
 
 export interface IAccountInfo {
-	jwt?: string;
-	refreshToken?: string;
+	// jwt?: string;
+	// refreshToken?: string;
 	userId?: string;
 	firstName?: string;
 	lastName?: string;
 	email?: string;
 	role?: "admin" | "user" | "student" | "teacher";
+	isAuthenticated?: boolean;
 }
 
 export interface IAccountState {
